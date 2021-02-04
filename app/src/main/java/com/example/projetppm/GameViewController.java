@@ -84,7 +84,7 @@ public class GameViewController extends Activity {
         public long duration ;
 
         public GameView gv ;
-        public HumanInterfaceView h;
+        public HumanInterfaceView hv;
         public ThreeDRoadModel modelRoad;
         public ThreeDRoadViewController threeDRoadVC  ;
 
