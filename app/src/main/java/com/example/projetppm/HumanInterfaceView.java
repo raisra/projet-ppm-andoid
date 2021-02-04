@@ -1,4 +1,4 @@
-package com.example.projetppm
+package com.example.projetppm;
 
 //
 //  HumanInterface.swift
@@ -9,171 +9,112 @@ package com.example.projetppm
 
 
 import android.content.Context;
+import android.graphics.drawable.AnimationDrawable;
+import android.os.Build;
+import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.RequiresApi;
+
+import java.util.function.Function;
 
 public class HumanInterfaceView extends View {
 
-    let messageButton = UIButton()
-    let scoreLabel = UILabel()
-
-    let pauseButton = UIButton()
-    let counterView = UIImageView()
-
-    let startButton = UIButton()
-
     //nombre de pieces réscoltées
-    var score : Int = 0
-
-    let h = UIScreen.main.bounds.height
-    let w = UIScreen.main.bounds.width
+    public int score = 0;
 
 
     //le nombre de pouvoirs
-    var nbPower : Int = 0
-    var powerAnchor : CGPoint = CGPoint(x: 0, y: 200)
-    let sizeOfPowerIcons : CGSize  = CGSize(width: 20, height: 20)
+    public int nbPower = 0;
+
+    //TODO traduire le code suivant
+    //public Point powerAnchor = CGPoint(x: 0, y: 200);
+    //let sizeOfPowerIcons : CGSize  = CGSize(width: 20, height: 20)
+
+
+    TextView scoreLabel;
+    Button pauseButton;
+
+    Button messageButton;
+    Button startButton;
 
     public HumanInterfaceView(Context context) {
         super(context);
-    }
 
 
-    /**
-    bouton pour simuler le deplacement du character
-     */
-
-    static func setButton(title: String, posx: CGFloat, posy : CGFloat) -> UIButton {
-        let b = UIButton()
-        b.frame = CGRect(x: posx, y: posy, width: 50, height: 50)
-        b.setTitle(title, for: .normal)
-        b.setTitleColor(.black, for: .normal)
-
-        return b
-    }
-
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        pauseButton.isHidden = true
-        pauseButton.setImage(UIImage(named: "pauseButton"), for: .normal)
-        pauseButton.addTarget(self.superview,
-                action: #selector(GameViewController.pauseGame),
-        for: .touchUpInside)
-
-        startButton.isHidden = true
-        startButton.setImage(UIImage(named: "startButton"), for: .normal)
-        startButton.addTarget(self.superview,
-                action: #selector(GameViewController.startGame),
-        for: .touchUpInside)
-
-
-        scoreLabel.text = "0"
-        scoreLabel.font = UIFont.boldSystemFont(ofSize: 18.0)
-        scoreLabel.textColor = .black
-
-                messageButton.setImage(UIImage(named: "message"), for: .normal)
-        messageButton.addTarget(self.superview, action: #selector(GameViewController.seeMessage), for: .touchUpInside)
-        messageButton.isHidden = true
-
-
-        addSubview(pauseButton)
-        addSubview(counterView)
-        addSubview(scoreLabel)
-        addSubview(messageButton)
-        addSubview(startButton)
-
+        scoreLabel =  findViewById(R.id.score_label);
+        pauseButton = findViewById(R.id.pause_button);
+        startButton = findViewById(R.id.start_button);
+        messageButton = findViewById(R.id.message_button);
 
     }
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+
+
+
+
+
+
+
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score){
+        this.score = score;
+
+        scoreLabel.setText(String.valueOf(score));
+
+        invalidate();
+        requestLayout();
+    }
+
+    public void addScore(int score){
+        this.score += score;
+        this.scoreLabel.setText(String.valueOf(score));
     }
 
 
 
-    override func draw(_ rect: CGRect) {
-        pauseButton.frame = CGRect(x: w/2-50, y: h/2-50, width: 100, height: 100)
-        startButton.frame = CGRect(x: w/2-50, y: h/2-50, width: 100, height: 100)
-        counterView.frame = CGRect(x: w/2-50, y: h/2-50, width: 100, height: 100)
 
-        scoreLabel.frame = CGRect(x: w-100, y: 30, width: 100, height: 100)
-        messageButton.frame = CGRect(x: 100, y: 30, width: 100, height: 100)
+    public void animationForNumber() {
+
+        ImageView counterView = findViewById(R.id.counter_view);
+        counterView.getAnimation().start();
+       // Animation animation = AnimationUtils.loadAnimation(getContext(),R.drawable.start_count_animation);
     }
 
 
-
-    func getScore()->Int {
-        return score
-    }
-
-    func setScore(score: Int){
-        self.score = score
-        self.scoreLabel.text = String(score)
-    }
-
-    func addScore(_ score: Int){
-        self.score += score
-        self.scoreLabel.text = String(self.score)
-    }
-
-    func animationForNumber(imageName: Int, callback: @escaping ()->Void) {
-
-        if(imageName>3){
-            print("start the game from callback")
-            callback()
-            return
-        }
-
-
-        let h = UIScreen.main.bounds.height
-                let w = UIScreen.main.bounds.width
-
-                counterView.image = UIImage(named: String(imageName))
-        counterView.alpha = 1
-        counterView.frame.origin = CGPoint(x: w/2-50, y: h/2-50)
-        counterView.frame.size = CGSize(width: 100, height: 100)
-
-
-        UIView.animate(withDuration: 1, delay: 0, options : [],
-        animations: {
-            print("animation \(imageName)")
-
-            self.counterView.alpha = 0
-            self.counterView.frame.origin = CGPoint(x: w/2-100, y: h/2-100)
-            self.counterView.frame.size = CGSize(width: 200, height: 200)
-
-        }, completion: {(true) in
-
-                self.animationForNumber(imageName: imageName + 1, callback: callback)
-
-        })
-    }
-
-
-    func addPower(powerView : UIImageView, duration : TimeInterval){
-        powerView.isHidden = false
-        powerView.frame.origin = self.powerAnchor
-        powerView.frame.size = self.sizeOfPowerIcons
-
-        nbPower += 1
-        powerAnchor.y += self.sizeOfPowerIcons.height
-
-        UIView.animate(withDuration: duration, delay: 0, options: .curveEaseIn, animations:
-        {
-            powerView.alpha = 0
-        },
-        completion: {(Bool) in
-                print("---------------completion done")
-            self.nbPower -= 1
-            self.powerAnchor.y -= self.sizeOfPowerIcons.height
-            powerView.isHidden = true
-        })
-
-    }
-
-    func resetPower() {
-        powerAnchor.y -= (sizeOfPowerIcons.height * CGFloat(nbPower))
-        nbPower = 0
-    }
+//    func addPower(powerView : UIImageView, duration : TimeInterval){
+//        powerView.isHidden = false
+//        powerView.frame.origin = self.powerAnchor
+//        powerView.frame.size = self.sizeOfPowerIcons
+//
+//        nbPower += 1
+//        powerAnchor.y += self.sizeOfPowerIcons.height
+//
+//        UIView.animate(withDuration: duration, delay: 0, options: .curveEaseIn, animations:
+//        {
+//            powerView.alpha = 0
+//        },
+//        completion: {(Bool) in
+//                print("---------------completion done")
+//            self.nbPower -= 1
+//            self.powerAnchor.y -= self.sizeOfPowerIcons.height
+//            powerView.isHidden = true
+//        })
+//
+//    }
+//
+//    func resetPower() {
+//        powerAnchor.y -= (sizeOfPowerIcons.height * CGFloat(nbPower))
+//        nbPower = 0
+//    }
 
 }

@@ -1,4 +1,7 @@
 package com.example.projetppm.ThreeDRoad;
 
-public class Level {
+public enum Level{
+    LOW,
+    MEDIUM,
+    HIGHT,
 }

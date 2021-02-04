@@ -1,8 +1,8 @@
 package com.example.projetppm;
 
 public enum  TypeOfObject implements Type {
-    _COIN_ ,
-    _EMPTY_,
+    coin,
+    empty,
     coinx2,
     coinx5,
     magnet,

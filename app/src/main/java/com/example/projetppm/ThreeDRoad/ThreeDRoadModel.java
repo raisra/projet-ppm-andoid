@@ -1,14 +1,11 @@
 package  com.example.projetppm.ThreeDRoad;
 
-import android.animation.ObjectAnimator;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.Size;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 
 import androidx.annotation.RequiresApi;
@@ -20,16 +17,7 @@ import com.example.projetppm.Type;
 import com.example.projetppm.TypeOfObject;
 
 
-enum Level{
-    LOW,
-    MEDIUM,
-    HIGHT,
-}
-
-
 public class ThreeDRoadModel extends ModelRoad {
-
-
 
     public int nbElements =0;
 
@@ -44,15 +32,12 @@ public class ThreeDRoadModel extends ModelRoad {
         float scale = (p.fSize - p.bSize)/p.nRows;
 
 
-
-
-
         for(int k=0  ; k<= super.nRows ; k++) {
             for(int i =super.iMin ; i<= super.iMax ; i++){
                 //
                 Frame f = getObj(i, k);
 
-                double s = computeSpeed();
+                long s = computeSpeed();
                 float o = computeOpacity(super.nRows-k);
                 float sc = 1 + scale/( p.bSize + scale * k );
                 float x = computeXTranslation(i,k);
@@ -66,14 +51,14 @@ public class ThreeDRoadModel extends ModelRoad {
                 f.xTranslate = x;
                 f.setType(TypeOfRoad.EMPTY);
 
-                initAnimation(f);
+               // initAnimation(f);
             }
         }
         for(int k=0 ; k<= super.nRows ; k++) {
             Frame f = this.getObj(0, k);
 
             Rect fr = computeFrame(nRows-k);
-            Double s = computeSpeed();
+            long s = computeSpeed();
             float o = computeOpacity(nRows-k);
             float sc = 1/factor;
             float y = computeYTranslation(nRows - k);
@@ -89,7 +74,7 @@ public class ThreeDRoadModel extends ModelRoad {
             f.setType(TypeOfRoad.EMPTY);
             f.index = nRows - k;
             f.index_j = -1;
-            initAnimation(f);
+           // initAnimation(f);
         }
 
     }
@@ -146,7 +131,7 @@ public class ThreeDRoadModel extends ModelRoad {
 
 
 
-    public double computeSpeed() {
+    public long computeSpeed() {
         return  duration;
     }
 
@@ -185,7 +170,7 @@ public class ThreeDRoadModel extends ModelRoad {
 
 
 
-    public Type generateElement(Level level){
+    public TypeOfRoad generateElement(Level level){
         TypeOfRoad lastElementType ;
         if (nbElements == 0){
             lastElementType = TypeOfRoad.STRAIGHT;
@@ -264,9 +249,11 @@ public class ThreeDRoadModel extends ModelRoad {
     //ajoute à la verticiale
     public Frame append(ImageView im, Type type){
 
+
         if( (nRows - nbElements) < 0){
             return null;
         }
+
 
         Frame obj = super.addObj(im, type, 0, nRows - nbElements);
         startAnimation(obj);
@@ -282,36 +269,11 @@ public class ThreeDRoadModel extends ModelRoad {
 
 
 
-    public void initAnimation(Frame elem){
-
-        Point center;
-        if(elem.index_j == -1) {
-            center = new Point(elem.frame.centerX(), elem.frame.centerY());
-        }
-        else {
-            center = elem.center;
-        }
-
-
-        ObjectAnimator translateY = ObjectAnimator.ofFloat(elem.view, "translationY",elem.yTranslate);
-        ObjectAnimator translateX = ObjectAnimator.ofFloat(elem.view, "translationX",elem.xTranslate);
-
-        ScaleAnimation scale = new ScaleAnimation(1, elem.scaleW, 1, elem.scaleH);
-
-        translateY.setDuration(duration);
-        translateX.setDuration(duration);
-        scale.setDuration(duration);
-
-
-        elem.view.startAnimation(scale);
-        translateX.start();
-        translateY.start();
-    }
-
     public Frame removeObject(int i , int j, Type type){
         Frame r = super.removeObject(i,j,type);
-        r.view.clearAnimation();
-
+        if(r!=null) {
+            r.view.setVisibility(View.INVISIBLE);
+        }
         return r;
     }
 
@@ -342,17 +304,6 @@ public class ThreeDRoadModel extends ModelRoad {
 
                 obj.view = prevObj.view;
                 obj.type = prevObj.type;
-
-                View view = obj.view;
-
-                if (i == 0){
-                    view.layout(obj.frame.left, obj.frame.top, obj.frame.right, obj.frame.bottom);
-                } else {
-                    ModelRoad.setlayout(view,obj.size,obj.center);
-                }
-
-                startAnimation(obj);
-                //view!.layer.addSublayer(viewToAnimate.layer)
 
                 j -= 1;
             }

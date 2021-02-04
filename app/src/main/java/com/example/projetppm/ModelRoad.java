@@ -1,23 +1,15 @@
 package com.example.projetppm;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.graphics.Point;
 import android.os.Build;
-import android.util.DisplayMetrics;
 import android.util.Size;
-import android.graphics.Rect;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageView;
 
 import androidx.annotation.RequiresApi;
 
 import java.util.Arrays;
-import java.util.Random;
-
-import static android.view.View.INVISIBLE;
 
 
 public class ModelRoad {
@@ -84,7 +76,7 @@ public class ModelRoad {
         /**Utile pour la génération des pieces */
         repeatCount = 0;
         prevRandomValue = new TypeOfObject[nColumns];
-        Arrays.fill(prevRandomValue, TypeOfObject._EMPTY_);// LE REMPLIR DE EMPTY
+        Arrays.fill(prevRandomValue, TypeOfObject.empty);// LE REMPLIR DE EMPTY
 
         prevR = 0;
 
@@ -107,7 +99,7 @@ public class ModelRoad {
 
                 f.setSize(s);
                 f.setCenter(o);
-                f.setType(TypeOfObject._EMPTY_);
+                f.setType(TypeOfObject.empty);
                 roadGrid[nColumns * k + i] = f;
             }
         }
@@ -156,10 +148,10 @@ public class ModelRoad {
         return bSize + (fSize - bSize) * k / nRows;
     }
 
-    public ImageView getObject(int i, int j) {
-        Frame obj = getObj(i, j);
-        return obj.view;
-    }
+//    public Bitmap getObject(int i, int j) {
+//        Frame obj = getObj(i, j);
+//        return obj.view;
+//    }
 
 
     /**
@@ -170,7 +162,7 @@ public class ModelRoad {
         //suppression de la derniere ligne
         for (int i = iMin; i <= iMax; i++) {
             Frame obj = getObj(i, nRows);
-            if (obj.getType() != TypeOfObject._EMPTY_) obj.view.setVisibility(INVISIBLE);
+            if (obj.getType() != TypeOfObject.empty) obj.view.setVisibility(View.INVISIBLE);
         }
 
         //decalage des case vers le bas
@@ -183,7 +175,7 @@ public class ModelRoad {
                 obj.view = prevObj.view;
                 obj.type = prevObj.type;
 
-                ImageView view = obj.view;
+                View view = obj.view;
                 setlayout(view, obj.size, obj.center);
 
                 j -= 1;
@@ -194,7 +186,7 @@ public class ModelRoad {
         for (int i = iMin; i <= iMax; i++) {
             Frame obj = roadGrid[i];
             obj.view = null;
-            obj.type = TypeOfObject._EMPTY_;
+            obj.type = TypeOfObject.empty;
         }
     }
 
@@ -207,9 +199,9 @@ public class ModelRoad {
 
     public Frame addObj(ImageView img, Type type, int i, int j) {
         Frame obj = getObj(i, j);
-        setlayout(img, obj.size, obj.center);
+       // setlayout(img, obj.size, obj.center);
 
-        obj.setObj(img);
+        obj.setView(img);
         obj.setType(type);
 
         return obj;
@@ -217,7 +209,7 @@ public class ModelRoad {
 
     public void removeAndDelete(int i, int j, Type type) {
         Frame r = removeObject(i, j, type);
-        r.view.setVisibility(INVISIBLE);
+        r.view.setVisibility(View.INVISIBLE);
         r.view = null;
     }
 
@@ -230,7 +222,7 @@ public class ModelRoad {
 
         Frame obj = getObj(i, j);
         if (obj.getType() == type || type == TypeOfObject.any) {
-            obj.setType(TypeOfObject._EMPTY_);
+            obj.setType(TypeOfObject.empty);
             obj.view = null;
             return obj;
         }
@@ -264,12 +256,12 @@ public class ModelRoad {
 
 
         prevRandomValue = new TypeOfObject[nColumns - 2];
-        Arrays.fill(prevRandomValue, TypeOfObject._EMPTY_);
+        Arrays.fill(prevRandomValue, TypeOfObject.empty);
 
 
         int r = random(1, nColumns - 2);
         int r1 = (r + prevR) % (nColumns - 2);
-        prevRandomValue[r1] = TypeOfObject._COIN_;
+        prevRandomValue[r1] = TypeOfObject.coin;
         prevR = r1;
         repeatCount -= 1;
         return prevRandomValue;
@@ -292,7 +284,7 @@ public class ModelRoad {
         } else {
             p = random(1, 100);
             TypeOfObject[] objPos = new TypeOfObject[iMax];
-            Arrays.fill(objPos, TypeOfObject._EMPTY_);
+            Arrays.fill(objPos, TypeOfObject.empty);
 
             int r1 = random(0, iMax - 1);
             TypeOfObject t;

@@ -2,11 +2,15 @@ package com.example.projetppm;
 
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
+import android.view.View;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
@@ -15,41 +19,22 @@ import androidx.annotation.RequiresApi;
 import com.example.projetppm.ThreeDRoad.*;
 
 
-import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
 
-
-
-
+import static com.example.projetppm.TypeOfObject.*;
 
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class GameViewController extends Activity {
+public class GameViewController extends Activity implements  Runnable{
 
         public  String TAG = "GAMEVIEWCONTROLLER";
-        public static int DISTANCE_OF_MAGNET = 5;
-        public static double  TTL_POWER = 5.0;
-        public static boolean  COINS_ARE_ANIMATED = false;
-        public static int  INITIAL_CHAR_POSITION  = 1;
-        public static String  BACK_GROUND_IMAGE = "aboveTheSky";
-
-        public static int  NB_ROWS  = 10;
-        public static int  NB_COLUMNS  = 5;
-
-        public static long  DURATION = 300;
-        //the size of the uiview representing the character;
-        public static Size sizeChar  = new Size(300, 675);
 
 
-        public Map<TypeOfRoad, String> NAMES  = Map.of(
-        TypeOfRoad.STRAIGHT ,"pave",
-        TypeOfRoad.BRIDGE,"bridge",
-        TypeOfRoad.EMPTY, "pave",
-        TypeOfRoad.PASSAGE, "pave",
-        TypeOfRoad.TREE, "tree",
-        TypeOfRoad.TURN_RIGHT,"turnRight",
-        TypeOfRoad.TURNLEFT , "turnLeft");
+
+        public Map<TypeOfRoad, String> NAMES  ;
+
+
 
 
 
@@ -104,10 +89,19 @@ public class GameViewController extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         Log.d(TAG, "view on create");
 
-        duration = DURATION;
+        NAMES = new HashMap<TypeOfRoad, String>();
+        NAMES.put(TypeOfRoad.STRAIGHT ,"pave");
+        NAMES.put(TypeOfRoad.BRIDGE,"bridge");
+        NAMES.put(TypeOfRoad.EMPTY, "pave");
+        NAMES.put(TypeOfRoad.PASSAGE, "pave");
+        NAMES.put(TypeOfRoad.TREE, "tree");
+        NAMES.put(TypeOfRoad.TURN_RIGHT,"turnRight");
+        NAMES.put(TypeOfRoad.TURNLEFT , "turnLeft");
+
+
+        duration = Config.DURATION;
         //init du model 3D
 
         float r = sizeIm.getHeight()/sizeIm.getWidth();
@@ -115,100 +109,76 @@ public class GameViewController extends Activity {
         getWindowManager().getDefaultDisplay().getSize(p);
 
         sizeIm = new Size(p.x, (int) (sizeIm.getWidth() * r));
-
-
-
-        float D = (float) (sizeIm.getWidth() * Math.pow(factor, NB_ROWS));
-
-
-
-        Param param = new Param(NB_ROWS, NB_COLUMNS, p.x, D, 5, 50, sizeIm, factor, p.y);
+        float D = (float) (sizeIm.getWidth() * Math.pow(factor, Config.NB_ROWS));
+        Param param = new Param(Config.NB_ROWS, Config.NB_COLUMNS, p.x, D, 5, 50, sizeIm, factor, p.y);
 
         modelRoad = new ThreeDRoadModel(param, duration);
 
         //initialise la position du persinnage au mileu de l'ecran
-        thePosition = new Point((modelRoad.iMax + modelRoad.iMin)/2 , NB_ROWS - INITIAL_CHAR_POSITION);
-
+        thePosition = new Point((modelRoad.iMax + modelRoad.iMin)/2 , Config.NB_ROWS - Config.INITIAL_CHAR_POSITION);
         Point posOfCharacter = modelRoad.getCenter(thePosition.x, thePosition.y);
 
 
-
-        gv = new GameView(this.getBaseContext(), duration, posOfCharacter, sizeChar);
-
-        hv = HumanInterface(frame: UIScreen.main.bounds);
-        sv = SettingsView(frame: UIScreen.main.bounds);
+        hv = new HumanInterfaceView(getBaseContext());
+        gv = new GameView(getBaseContext(), duration, posOfCharacter, Config.sizeChar);
 
 
 
-
-        threeDRoadVC = new ThreeDRoadViewController();
-
-                (names: NAMES,
-                duration: duration!,
-                model3D: modelRoad,
-                N: Int(NB_ROWS));
-
-        addChild(threeDRoadVC);
-        threeDRoadVC.didMove(toParent: self);
-        backGround.frame = UIScreen.main.bounds;
-        GameView.initView(backGround, BACK_GROUND_IMAGE);
-        view.addSubview(backGround);
-        view.addSubview(threeDRoadVC.view);
-        view.addSubview(gv);
-        view.addSubview(hv);
-        view.addSubview(sv);
-        sv.isHidden = true;
-
-        SoundOnOff = sv.soundON();
-
-        //       gestureManager = GestureManager(forView: self.hv)
-//        motionManager = MotionManager()
+        setContentView(R.layout.human_interface_view);
+        setContentView(R.layout.game);
 
 
-        //     gestureManager?.delegate = self
-        //     motionManager?.delegate = self
-        motionManager?.start();
+        threeDRoadVC = new ThreeDRoadViewController(NAMES, duration, modelRoad, Config.NB_ROWS);
+
+
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        hv.animationForNumber();
+
+        startTheGame();
+        threeDRoadVC.startTheGame();
+    }
 
 
 
-
-
-        hv.animationForNumber(imageName: 1) {
-            self.startGame()
-            self.threeDRoadVC.startTheGame()
+    @Override
+    public void run() {
+        while(!gameIsStoped) {
+            updateView();
+           // gv.draw();
+            sleep();
         }
     }
 
 
 
 
+    public void sleep(){
+        try {
+            Thread.sleep((long) duration);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
-
-
-
-        public void  startTheGame(){
-
-
-            //soundManager.playGameSound()
+    public void  startTheGame(){
 
             gv.showCharacter();
             gv.startAnimation();
 
-            hv.pauseButton.isHidden = true;
-            hv.messageButton.isHidden = false;
-            hv.startButton.isHidden = true;
-
-             thread = new Thread(new Runnable() {
-                 @Override
-                 public void run() {
-
-                 }
-             });
-            thread.start();
-
-
+            hv.pauseButton.setVisibility(View.INVISIBLE);
+            hv.messageButton.setVisibility(View.VISIBLE);
+            hv.startButton.setVisibility(View.INVISIBLE);
+            gv.objectsView.setVisibility(View.VISIBLE);
 
             gameIsStoped = false;
+            thread = new Thread(this);
+            thread.start();
         }
 
 //        @objc func startGame() {
@@ -216,276 +186,282 @@ public class GameViewController extends Activity {
 //        }
 
 
-        public void  pauseGame() {
+        public void  pauseGame() throws InterruptedException {
             //TODO SAUVEGARDER LE niveau et la valeur du timer pr elancer le timer a la meme frequence
             if(!gameIsStoped){
                 gameIsStoped = true;
+                thread.join();
                 gv.stopAnimation();
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                gv.objectsView.setVisibility(View.INVISIBLE);
 
-
-                //gv.viewHandlingCoins.isHidden = true
-                hv.pauseButton.isHidden = false;
-                soundManager.stopGameSound();
+                hv.pauseButton.setVisibility(View.VISIBLE);
             }
             else {
                 //restart the game
-                startGame();
+                thread.start();
                 gameIsStoped = false;
-                hv.pauseButton.isHidden = true;
-                gv.objectsView.isHidden = false;
+                hv.pauseButton.setVisibility(View.INVISIBLE);
+                gv.objectsView.setVisibility(View.VISIBLE);
+
             }
         }
 
 
 
         //display the message view
-        @objc func seeMessage(){
-            print("click on message button")
-            present(mvc, animated: true, completion: nil)
+        public void seeMessage(){
+         //   Intent intent = new Intent(getBaseContext(), Message);
         }
 
 
-        override func viewDidDisappear(_ animated: Bool) {
-            print("gae vew will deseapper")
-            pauseGame()
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try {
+            pauseGame();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Init the view with the bitmap name
+     * @param view the view to initialize
+     * @param name name of the bitmap
+     * @param animated
+     */
+    public boolean initView(ImageView view , String name, boolean animated) {
+
+        if (!animated) {
+            Bitmap img = getBitMap(name);
+            if (img != null) {
+                view.setBackground(new BitmapDrawable(getResources(), img));
+                return true;
+            } else {
+                return false;
+            }
+
+        } else{
+            int imgId = getResources().getIdentifier("animation_"+"name", "drawable", getPackageName());
+            if (imgId == 0) {
+                return false;
+            } else {
+                view.setBackgroundResource(imgId);
+                return true;
+            }
         }
 
 
+    }
+
+
+    private Bitmap getBitMap(String name){
+        int imgId = getResources().getIdentifier(name, "drawable", getPackageName());
+        Bitmap image = BitmapFactory.decodeResource(getResources(), imgId);
+        return  image;
+    }
 
 
 
         /**
          genere aleatoirement un objet qur le parcours
          */
-        func createObject(){
+        public void  createObject(){
             //on commence par générer un objet grace au model
-            let a = modelRoad.generateNewObject(level: 0)
+            TypeOfObject objs[] = modelRoad.generateNewObject(0);
 
-            for colonne in 0..<modelRoad.iMax {
+
+            for ( int colonne=0; colonne<modelRoad.iMax ; colonne++){
                 //le type de l'objet créé
-                let type : TypeOfRoad = a[colonne]
-                var newObject : UIImageView?
-                        var animated : Bool? = false
-                var name: String? //the name of the file cointaining the object to draw
+                TypeOfObject type= objs[colonne];
 
-                        switch type {
-                    case _COIN_:
+
+                boolean animated = false;
+                String name = null; //the name of the file cointaining the object to draw
+
+                switch(type) {
+                    case coin:
                         //le model a créé une piece
-                        animated = COINS_ARE_ANIMATED
-                        name = "coin"
-                        if(coins.isEmpty){
-
-                            newObject = UIImageView()
-                            //let s = String(UInt(bitPattern: ObjectIdentifier(newCoin)))
-                            // print("\t\t------------create new coin \(s) \(d)--------------")
-
-                        }
-                        else{
-                            newObject = coins.popFirst()!
-
-                            //let s = String(UInt(bitPattern: ObjectIdentifier(newCoin)))
-                            //print("\t\t\t\t\t\t-----------reuse  coin \(s) \(coins.count)------------")
-                        }
-                        break
+                        animated = Config.COINS_ARE_ANIMATED;
+                        name = "coin";
+                        break;
 
                     case magnet :
                         //le model a créé un aimant
-                        animated = false
-                        name = "magnet"
-                        newObject = UIImageView()
-                        break
+                        animated = false;
+                        name = "magnet";
+                        break;
 
                     case coinx2 :
                         //le model a créé une piece+2
-                        animated = COINS_ARE_ANIMATED
-                        name = "coin-x2"
-                        newObject = UIImageView()
-                        break
+                        animated = Config.COINS_ARE_ANIMATED;
+                        name = "coin-x2";
+                        break;
 
                     case coinx5 :
                         //le model a créé une piece+2
-                        animated = COINS_ARE_ANIMATED
-                        name = "coin-x5"
-                        newObject = UIImageView()
-                        break
+                        animated = Config.COINS_ARE_ANIMATED;
+                        name = "coin-x5";
+                        break;
 
-                    case any : continue
-                    case _EMPTY_: continue
-                    default: continue
+                    case any : continue;
+                    case empty: continue;
+                    default: continue;
                 }
 
                 //le nouvel objet est initialisée avec l'image qui lui correspond
-                newObject!.isHidden = false
-                GameView.initView(newObject!, name!, speed: 1, animated: animated!)
-                gv.objectsView.addSubview(newObject!)
-                //l'objet est mis en arriere plan
-                gv.objectsView.sendSubviewToBack(newObject!)
-                //l'objet est ajouté au model
-                let f = modelRoad.addObj(newObject!, type: type, i: colonne + modelRoad.iMin , j: 0)
-                modelRoad.initAnimation(elem: f)
-                modelRoad.startAnimation(elem: f)
+                ImageView newObject = new ImageView(getBaseContext());
+                newObject.setVisibility(View.VISIBLE);
+                initView(newObject,name, animated);
+
+                gv.objectsView.addView(newObject);
+                //TODO sendtoback ne fonctionne pas pourquoi???????????
+               // newObject.sendToBack();
+
+
+                Frame f = modelRoad.addObj(newObject, type, colonne + modelRoad.iMin , 0);
+                //modelRoad.initAnimation(elem: f);
+                //modelRoad.startAnimation(elem: f);
             }
         }
 
 
 
         //dictionnaire contenant le Time to live de chaque pouvoir qui a été enclenché
-        var TTL: [(TypeOfRoad, TimeInterval)] = [(TypeOfRoad, TimeInterval)]()
+        Map<TypeOfRoad, Long> TTL = new HashMap<>();
 
         /**
          cette fonction créé  un objet
          vérifie si des pouvoirs sont en cours d'execution et met à jour leur timers respectifs
          */
-        var nbOfTurn : Int = 0
-        var level : Level = .easy
+        int nbOfTurn  = 0;
+        Level level = Level.LOW;
 
-        let MALUS_DURATION :TimeInterval = 2.0
-        var malus : Bool = false //indique si le personnage s'est cogné
+        long MALUS_DURATION  = 2l;
+        boolean malus  = false; //indique si le personnage s'est cogné
 
-        var timerJump : TimeInterval = 0.0
-        var timerBlink: TimeInterval = 0.0
-
-        @objc func updateView() {
+        long timerJump = 0l;
+        long timerBlink = 0l;
 
 
 
+        public void  updateView() {
             //on véerifie si le personnage a sauté
-            if wantToJump {
-                timerJump -= duration!
-                if timerJump < 0 {
-                    print("End jumping")
-                    timerJump = 0.0
-                    wantToJump = false
-                    gv.animationForRunning()
+            if (wantToJump) {
+                timerJump -= duration;
+                if (timerJump < 0 ){
+                    timerJump = 0l;
+                    wantToJump = false;
+                    gv.animationForRunning();
                 }
             }
 
-            if malus {
-                timerBlink -= duration!
-                if timerBlink < 0 {
-                    print("End Blink")
-                    timerBlink = 0.0
-                    malus = false
+            if(malus) {
+                timerBlink -= duration;
+                if (timerBlink < 0) {
+                    timerBlink = 0;
+                    malus = false;
                 }
             }
 
 
             //on vérifie sur quel type de route se trouve le personnage
-            let t = modelRoad.getElemAtIndex(Int(INITIAL_CHAR_POSITION))?.type
-            if (t == TURNLEFT && !wantToTurnLeft) || (t == TURN_RIGHT && !wantToTurnRight) {
+            TypeOfRoad t = (TypeOfRoad)modelRoad.getElemAtIndex(Config.INITIAL_CHAR_POSITION).type;
+
+            if ((t == TypeOfRoad.TURNLEFT && !wantToTurnLeft) || (t == TypeOfRoad.TURN_RIGHT && !wantToTurnRight)) {
                 //le joueur a perdu
-                print("l'utilisateur va perdre")
-                if (SoundOnOff){
-                    soundManager.playEndSound()
-                }
-                gameOver()
-                return
+               // gameOver()
+                return;
             }
 
 
-            if( t == TREE && !wantToJump && malus ){
+            if( t == TypeOfRoad.TREE && !wantToJump && malus ){
                 //le personnage s'est cogné deux fois d'affiler
-                print("on a perdu")
-                gameOver()
-                return
+                //gameOver();
+                return;
             }
 
-            if (t == TURNLEFT && wantToTurnLeft) || (t == TURN_RIGHT && wantToTurnRight){
+            if ((t == TypeOfRoad.TURNLEFT && wantToTurnLeft) || (t == TypeOfRoad.TURN_RIGHT && wantToTurnRight)){
 
-                nbOfTurn += 1
+                nbOfTurn += 1;
 
-                level = Level(rawValue: Int(nbOfTurn/10)) ?? .hard
-
-                print("The Game is becoming Harder")
-                threeDRoadVC.turn(level: level)
-                wantToTurnLeft = false
-                wantToTurnRight = false
+                threeDRoadVC.turn(level);
+                wantToTurnLeft = false;
+                wantToTurnRight = false;
 
                 //on invalide le timer et on en rreceer un autre plus rapide
-                self.timer?.invalidate()
-                duration = duration! * 0.95
-                threeDRoadVC.setDuration(duration!)
+                thread.interrupt();
+                duration = duration - 10;
+                threeDRoadVC.setDuration(duration);
 
-                self.timer =  Timer.scheduledTimer(timeInterval:  duration!, target: self, selector: #selector(self.updateView), userInfo: nil, repeats: true)
+                thread = new Thread();
+                thread.start();
 
-                return
+                return;
             }
 
 
-            if( t == TREE && !wantToJump) {
-                print("Le personnage se cogne sur un arbre")
-                if (SoundOnOff){
-                    soundManager.playCollisionSound()
-                }
-
-                malus = true
-                gv.animateBlink()
-                timerBlink = BLINK_DURATION
+            if( t == TypeOfRoad.TREE && !wantToJump) {
+                malus = true;
+                gv.animateBlink();
+                timerBlink = Config.BLINK_DURATION;
             }
 
 
 
 
 
-            let lastElemType = modelRoad.getLastElem()?.type
-            if !threeDRoadVC.stopGeneratingCoins() && (lastElemType == STRAIGHT || lastElemType == BRIDGE){
-                print("create object over \(lastElemType)")
-                createObject()
+            TypeOfRoad lastElemType = (TypeOfRoad)modelRoad.getLastElem().type;
+            if (!threeDRoadVC.stopGeneratingCoins() && (lastElemType == TypeOfRoad.STRAIGHT || lastElemType == TypeOfRoad.BRIDGE)){
+                createObject();
             }
 
-            modelRoad.movedown()
+            modelRoad.movedown();
 
-            threeDRoadVC.createRoad(level: level)
+            threeDRoadVC.createRoad(null, level);
 
             //vérifie s'il y a des pouvoirs en cours d'execution
             //met à jour le timer
-            handlePower()
+          //  handlePower();
 
 
             //tentative de suppression de l'objet situé devant le personnage
             //suppression de l'objet située 1 cases devant
-            let obj : (type: TypeOfRoad, view: UIImageView?)
-            obj = modelRoad.removeObject(i: thePosition.0, j: thePosition.1, type: any)
+            Frame obj = modelRoad.removeObject(thePosition.x, thePosition.y, any);
 
             //si aucun n'objet n'est devant le personnage rien à faire
-            if (obj == (_EMPTY_, nil)){
-                return}
+            if (obj == null){
+                return;
+            }
 
 
             //les coordonnées du point vers lesquels renvoyer les pieces
-            var p : CGPoint?
+           // Point p;
                     //callback a executer qd le personnage rencontre un object
-                    var cb : ((Bool) -> ())?
+           // var cb : ((Bool) -> ())?
+            switch ((TypeOfObject)obj.type) {
 
-                    switch obj.type {
-
-                case _COIN_:
+                case coin:
                     //le personnage attrape une piece
-                    if (SoundOnOff){
-                        soundManager.playCollisionSound()
-                    }
-                    hv.addScore(1)
-                    p = hv.scoreLabel.center
-                    cb = {(Bool) in  obj.view?.isHidden = true }
-                    break
+
+                    hv.addScore(1);
+                   // p = hv.scoreLabel.center
+                   // cb = {(Bool) in  obj.view?.isHidden = true }
+                    break;
 
                 case coinx2:
                     //le personnage attrape une piece double
-                    hv.addScore(2)
-                    p = hv.scoreLabel.center
-                    cb = {(Bool) in  obj.view?.isHidden = true }
-                    break
+                    hv.addScore(2);
+                  //  p = hv.scoreLabel.center;
+                  //  cb = {(Bool) in  obj.view?.isHidden = true }
+                    break;
 
                 case coinx5:
-                    hv.addScore(5)
-                    p = hv.scoreLabel.center
-                    cb = {(Bool) in  obj.view?.isHidden = true }
-                    break
+                    hv.addScore(5);
+                   // p = hv.scoreLabel.center
+                   // cb = {(Bool) in  obj.view?.isHidden = true }
+                    break;
                 //TODO FACTORISER LE CODE PRECEDENT
 
 
@@ -493,274 +469,126 @@ public class GameViewController extends Activity {
                 case magnet:
                     //le personnage attrape un aimant
                     //l'icone de l'aimant est déplacée au point de coordonnées p
-                    p = hv.powerAnchor
-                    print("aimant s'en enclenché \(TTL_POWER)")
+                  //  p = hv.powerAnchor;
+
 
                     //a la fin de l'animation, ajout de l'icone du pouvoir à l'emplacement réservé dans HumanInterface
-                    cb = {(Bool) in
-                            //declenchement du timer pendant 10s
-                            self.TTL.append((magnet, TTL_POWER))
-                    self.hv.addPower(powerView: obj.view!, duration: TTL_POWER)
-                    print("add the power now")
-            }
+//                    cb = {(Bool) in
+//                            //declenchement du timer pendant 10s
+//                            self.TTL.append((magnet, TTL_POWER))
+                    //self.hv.addPower(powerView: obj.view!, duration: TTL_POWER)
+                    //print("add the power now")
+                //}
 
-                    break
+                    break;
 
 
                 default:
-                    break
+                    break;
             }
 
             //deplacement de l'objet si les coordonnées p sont non nuls
-            moveObjToPoint(obj.view!, point: p, withDuration: 1, options: .transitionCurlUp, cb : cb)
-
-            wantToTurnLeft = false
-            wantToTurnRight = false
-
-        }
-
-
-
-        var aa = 0
-        func handlePower(){
-
-            //si un aucun poucoir n'est en cours d'execution on ne fait rien
-            if(TTL.isEmpty) {return}
-
-            var i = 0
-            while i<TTL.count  {
-                let (power, ttl) = TTL.first!
-                //si le pouvoir a fini de s'executer
-                if ttl <= 0 {
-                    print("le pouvoir \(power) est terminé")
-                    //un pouvoir est enclenché
-                    TTL.remove(at: 0)
-                    aa = 0
-                    continue
-                }
-
-                let timeToLive = ttl - duration!
-                        TTL[0].1 = timeToLive
-                aa += 1
-
-                switch power {
-
-                    case magnet:
-                        //attirer les pieces situé dans le voisinage
-                        //on commence par retirer les pieces concernées du chemin
-
-
-                        for i in 0..<modelRoad.nColumns {
-                        for neighborhood in 1 ... DISTANCE_OF_MAGNET {
-                            //on tente de retirer les pieces situées dans le voisinage du personnage
-                            let coin = modelRoad.removeObject(i: i, j: thePosition.1 - neighborhood, type: _COIN_).view
-
-                            //si on trouve une piece
-                            if coin != nil {
-                                //on deplace la piece vers le personnage
-                                moveObjToPoint(coin!,
-                                        point: gv.character.center,
-                                        withDuration: 1,
-                                        options: .curveEaseIn,
-                                        cb : {_ in
-                                    coin!.isHidden = true
-                                    self.coins.insert(coin!)
-                                }
-                            )
-
-                                //TODO faire un mouvement plus naturel
-                                //Peut etre animation suivant une courbe de bezier
-                            }
-                        }
-                    }
-                    break
-
-                    case transparency:
-                        //le personnage devient mi-transparent
-                        //il devient capable de traverser les obstacles
-                        gv.character.alpha = 0.5
-                        break
-
-                    default:
-                        print("handlePower : ne devrait jamais safficher")
-                }
-
-                i += 1
-            }
-
-        }
-
-
-
-
-        /**
-         deplacement de l'image obj vers le point de coordonnées point.
-         */
-        func moveObjToPoint(_ obj : UIImageView, point : CGPoint?, withDuration duration: TimeInterval = DURATION, options: UIView.AnimationOptions = [] , cb : ((Bool) ->())?){
-
-            if(point == nil) {return}
-
-            UIView.animate(withDuration: duration, delay: 0, options: options, animations: {
-                obj.frame.origin = point!
-                //obj.frame.size.height = obj.frame.size.height/3.0
-                //obj.frame.size.width = obj.frame.size.width/3.0
-            }, completion: cb)
-        }
-
-        var wantToTurnLeft : Bool = false
-        var wantToTurnRight  : Bool = false
-        var wantToJump : Bool = false
-
-        @objc func jump() {
-            if !wantToJump {
-                timerJump = JUMP_DURATION
-                wantToJump = true
-                if (SoundOnOff){
-                    soundManager.playEdgeSound()
-                }
-                gv.animationForJump()
-            }
-        }
-
-
-
-        @objc func jumpMore() {
-            if !wantToJump {
-                timerJump = JUMP_DURATION + JUMP_DURATION
-                wantToJump = true
-                if (SoundOnOff){
-                    soundManager.playEdgeSound()
-                }
-                gv.animationForJump()
-            }
-
-        }
-
-        @objc func tapSauteAfunc (){
-            //Saute plus longtemps
-            jumpMore()
-
-        }
-
-
-        @objc func pressAccelerateFunc () {
-            print("accelerating")
-            self.gv.setSpeed(speed: 0.2)
-        }
-
-        func rightmove(){
-            thePosition.0 = min(modelRoad.iMax , thePosition.0 + 1)
-            let s = modelRoad.getCenter(i: thePosition.0, j: thePosition.1)
-
-            //  gv.character.center = s
-            print("hello from move right")
-
-            gv.animationMove(to: s)
-            wantToTurnRight = true
-        }
-
-        func leftmove (){
-            thePosition.0 = max(modelRoad.iMin, thePosition.0 - 1)
-            let s = modelRoad.getCenter(i: thePosition.0, j: thePosition.1)
-            //gv.character.center = s
-            gv.animationMove(to: s)
-            print("hello from move left")
-            wantToTurnLeft = true
-        }
-
-        func upmove (){
-            jump()
-
-        }
-
-        func downmove(){
-            //Plus la même image donc je ne peux pas le faire...
-        }
-
-
-        @objc func swipeDirectionFunc (sender : UISwipeGestureRecognizer){
-            if sender.direction == .right {
-                print("going right")
-                rightmove()
-            }
-            if sender.direction == .left {
-                print("going left")
-                leftmove()
-
-            }
-            if sender.direction == .up {
-                print("going up")
-                upmove()
-            }
-            if sender.direction == .down {
-                print("going down")
-                downmove()
-
-            }
-        }
-
-
-
-
-        public void gameOver() {
-
-            gv.stopAnimation();
-            Thread.joi
-            timer=nil;
-            gameIsStoped = true;
-
-            modelRoad.reset();
-
-            soundManager.stopGameSound();
-
-            hv.resetPower();
-
-            //effacer toutes les pieces et pouvoir etc
-            //relancer le timer
-            //remettre la duration des controller à la valeur initiale
-
+            //moveObjToPoint(obj.view!, point: p, withDuration: 1, options: .transitionCurlUp, cb : cb)
 
             wantToTurnLeft = false;
             wantToTurnRight = false;
-            wantToJump = false;
-
-            threeDRoadVC.goingToTurn = false;
-            threeDRoadVC.stopCoins = false;
-
-
-            self.timer?.invalidate();
-            duration = DURATION;
-            threeDRoadVC.setDuration(duration!);
-
-            //scoreViewController.reference(int: hv.getScore(), for key:"scores")
-            thePosition = ((modelRoad.iMax + modelRoad.iMin)/2 , Int(NB_ROWS - INITIAL_CHAR_POSITION));
-
-            let posOfCharacter = modelRoad.getCenter(i: thePosition.0, j: thePosition.1);
-
-            gv.hideCharacter();
-            // viewWillAppear(true)
-            //scoreViewController.modalTransitionStyle = .coverVertical
-            // scoreViewController.isModalInPresentation = true
-            self.present(scoreViewController, animated: true, completion: nil);
 
         }
 
-    @Override
-    public void run() {
-            while(!gameIsStoped) {
-                updateView();
-                sleep();
+
+
+
+//        func handlePower(){
+//
+//            //si un aucun poucoir n'est en cours d'execution on ne fait rien
+//            if(TTL.isEmpty) {return}
+//
+//            var i = 0
+//            while i<TTL.count  {
+//                let (power, ttl) = TTL.first!
+//                //si le pouvoir a fini de s'executer
+//                if ttl <= 0 {
+//                    print("le pouvoir \(power) est terminé")
+//                    //un pouvoir est enclenché
+//                    TTL.remove(at: 0)
+//
+//                    continue
+//                }
+//
+//                let timeToLive = ttl - duration!
+//                        TTL[0].1 = timeToLive
+//                aa += 1
+//
+//                switch power {
+//
+//                    case magnet:
+//                        //attirer les pieces situé dans le voisinage
+//                        //on commence par retirer les pieces concernées du chemin
+//
+//
+//                        for i in 0..<modelRoad.nColumns {
+//                        for neighborhood in 1 ... DISTANCE_OF_MAGNET {
+//                            //on tente de retirer les pieces situées dans le voisinage du personnage
+//                            let coin = modelRoad.removeObject(i: i, j: thePosition.1 - neighborhood, type: coin).view
+//
+//                            //si on trouve une piece
+//                            if coin != nil {
+//                                //on deplace la piece vers le personnage
+//                                moveObjToPoint(coin!,
+//                                        point: gv.character.center,
+//                                        withDuration: 1,
+//                                        options: .curveEaseIn,
+//                                        cb : {_ in
+//                                    coin!.isHidden = true
+//                                    self.coins.insert(coin!)
+//                                }
+//                            )
+//
+//                                //TODO faire un mouvement plus naturel
+//                                //Peut etre animation suivant une courbe de bezier
+//                            }
+//                        }
+//                    }
+//                    break
+//
+//                    case transparency:
+//                        //le personnage devient mi-transparent
+//                        //il devient capable de traverser les obstacles
+//                        gv.character.alpha = 0.5
+//                        break
+//
+//                    default:
+//                        print("handlePower : ne devrait jamais safficher")
+//                }
+//
+//                i += 1
+//            }
+//
+//        }
+
+
+
+
+
+
+        boolean wantToTurnLeft  = false;
+        boolean wantToTurnRight  = false;
+        boolean wantToJump = false;
+
+
+        public void jump() {
+            if (!wantToJump) {
+                timerJump = Config.JUMP_DURATION;
+                wantToJump = true;
+
+                gv.animationForJump();
             }
-    }
-
-
-    public void sleep(){
-        try {
-            Thread.sleep((long) DURATION);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
-    }
+
+
+
+
+
 }
 
 

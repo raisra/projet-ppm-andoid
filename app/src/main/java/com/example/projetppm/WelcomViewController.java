@@ -17,15 +17,15 @@ public class WelcomViewController extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.welcome_view);
 
-        Button playGame = findViewById(R.id.play_button);
-        playGame.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), GameViewController.class);
-                startActivity(intent);
-            }
-        });
     }
+
+
+    public void startGame(View view){
+        Intent intent = new Intent(view.getContext(), GameViewController.class);
+        startActivity(intent);
+    }
+
+
 }

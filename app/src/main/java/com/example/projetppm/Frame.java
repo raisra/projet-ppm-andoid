@@ -8,6 +8,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Size;
+import android.view.View;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 
@@ -15,8 +16,8 @@ import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 
-public class ObjectView extends  androidx.appcompat.widget.AppCompatImageView {
-    ArrayList<BitmapDrawable> view;
+public class Frame  {
+    public ImageView view;
     public Size size;
     public Point center;
     public Rect frame;
@@ -34,60 +35,18 @@ public class ObjectView extends  androidx.appcompat.widget.AppCompatImageView {
 
     public android.animation.Animator transformation ;
 
-    /**
-     * indiquates if the object is animated
-     */
-    boolean animated;
-
-    /**
-     * indiquates if the object moves on the screen
-     */
-    boolean moves ;
-
-
-    public ObjectView(Context context, String name, boolean moves, boolean animated) {
-        super(context);
-        this.moves = moves;
-        this.animated = animated;
-
-        Bitmap img = getBitMap(name);
-
-        if(img!=null){
-            view = new ArrayList<>();
-            view.add(new BitmapDrawable(getResources(),img));
-            animated = false;
-        }
-        else {
-            //check if it is an animated bitmap
-            int i = 1;
-
-            img = getBitMap(name + "_" + String.valueOf(i));
-            while( img != null){
-                view.add(new BitmapDrawable(getResources(),img));
-                i++;
-            }
-
-            animated = true;
-        }
-
-        if(moves){
-            setBackground(view.get(0));
-        }
 
 
 
+
+
+
+
+
+
+    public void setView(ImageView view) {
+        this.view = view;
     }
-
-    public ObjectView(@NonNull Context context) {
-        super(context);
-    }
-
-    private Bitmap getBitMap(String name){
-        int imgId = getResources().getIdentifier(name, "drawable", getPackageName());
-        Bitmap image = BitmapFactory.decodeResource(getResources(), imgId);
-        return  image;
-    }
-
 
     public void setFrame(Rect frame) {
         this.frame = frame;
@@ -115,29 +74,33 @@ public class ObjectView extends  androidx.appcompat.widget.AppCompatImageView {
 
 
 
-    public void initAnimation(){
-
-        if(!moves) return;
-
-        Point center;
-        if(index_j == -1) {
-            center = new Point(frame.centerX(), frame.centerY());
-        }
-
-
-        ObjectAnimator translateY = ObjectAnimator.ofFloat(view.get(0), "translationY",yTranslate);
-        ObjectAnimator translateX = ObjectAnimator.ofFloat(view.get(0), "translationX",xTranslate);
-
-        ScaleAnimation scale = new ScaleAnimation(1, scaleW, 1,scaleH);
-
-        translateY.setDuration(duration);
-        translateX.setDuration(duration);
-        scale.setDuration(duration);
-
-
-        startAnimation(scale);
-        translateX.start();
-        translateY.start();
-    }
+//    public void initAnimation(){
+//
+//        if(!moves) return;
+//
+//        Point center;
+//        if(index_j == -1) {
+//            center = new Point(frame.centerX(), frame.centerY());
+//        }
+//        else {
+//            center = center;
+//        }
+//
+//
+//
+//        ObjectAnimator translateY = ObjectAnimator.ofFloat(view.get(0), "translationY",yTranslate);
+//        ObjectAnimator translateX = ObjectAnimator.ofFloat(view.get(0), "translationX",xTranslate);
+//
+//        ScaleAnimation scale = new ScaleAnimation(1, scaleW, 1,scaleH);
+//
+//        translateY.setDuration(duration);
+//        translateX.setDuration(duration);
+//        scale.setDuration(duration);
+//
+//
+//        startAnimation(scale);
+//        translateX.start();
+//        translateY.start();
+//    }
 
 }

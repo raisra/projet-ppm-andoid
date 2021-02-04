@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+
+
+<com.example.projetppm.HumanInterfaceView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+
 
     <Button
         android:id="@+id/message_button"
@@ -13,7 +17,9 @@
         android:layout_marginStart="4dp"
         android:layout_marginLeft="4dp"
         android:layout_marginTop="8dp"
-        android:text="Mesage"
+        android:onClick="seeMessage"
+        android:text="Message"
+        android:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -33,7 +39,10 @@
 
         android:layout_width="88dp"
         android:layout_height="48dp"
+        android:onClick="pauseGame"
         android:text="Pause"
+        android:visibility="invisible"
+        app:icon="@drawable/icon_pause_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
@@ -41,5 +50,31 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.522" />
 
+    <Button
+        android:id="@+id/start_button"
+        android:layout_width="88dp"
+        android:layout_height="48dp"
+        android:onClick="startGame"
+        android:text="Button"
+        android:visibility="invisible"
+        app:icon="@drawable/icon_start_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.522" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <ImageView
+        android:id="@+id/counter_view"
+        android:layout_width="113dp"
+        android:layout_height="266dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.498"
+        app:srcCompat="@drawable/start_count_animation" />
+
+
+</com.example.projetppm.HumanInterfaceView>
