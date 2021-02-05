@@ -12,7 +12,11 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
+import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Size;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
@@ -20,42 +24,38 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.RequiresApi;
 
-public class GameView extends RelativeLayout {
+public class GameView extends ViewGroup {
 
-
-
-
+    public String TAG = "GAMEVIEW";
+    // la vue contenant tous les objets
     public ImageView character ;
-
+    public RelativeLayout objectsView ;
 
     AnimationDrawable jumpAnimation;
     AnimationDrawable runAnimation;
 
-
-    // la vue contenant tous les objets
-    public RelativeLayout objectsView ;
-
-
     public long speed ;
 
+    public GameView(Context context, AttributeSet set) {
+        super(context, set);
+    }
 
-
-
-    public GameView(Context context, long s, Point position, Size sizeOfChar){
-        super(context);
-        objectsView = new RelativeLayout(context);
+    public void init( long s, Point position, Size sizeOfChar){
         this.speed = s;
+        character = (ImageView) findViewById(R.id.character_view_id);
+        objectsView = (RelativeLayout) findViewById(R.id.objects_view);
 
-        character = (ImageView) findViewById(R.id.character_view);
+        Log.d(TAG, "ici");
         character.setBackgroundResource(R.drawable.animation_char_run);
-        runAnimation = (AnimationDrawable) character.getBackground();
-
         initPersonnage(position, sizeOfChar);
-
-        this.addView(objectsView);
     }
 
 
+    private void initPersonnage(Point center , Size size)  {
+        ModelRoad.setlayout(character,size,center);
+        character.setVisibility(INVISIBLE);
+        runAnimation = (AnimationDrawable) character.getBackground();
+    }
 
 
 
@@ -107,10 +107,7 @@ public class GameView extends RelativeLayout {
         moveAnimation.start();
     }
 
-    private void initPersonnage(Point center , Size size)  {
-        ModelRoad.setlayout(character,size,center);
-        character.setVisibility(INVISIBLE);
-    }
+
 
     public AnimationDrawable updateDurationofAnimation(AnimationDrawable input, int duration){
         AnimationDrawable output = new AnimationDrawable();
@@ -132,9 +129,8 @@ public class GameView extends RelativeLayout {
 
 
     public void startAnimation(){
-        runAnimation.stop();
+        runAnimation.start();
     }
-
 
     public void stopAnimation(){
         runAnimation.stop();
@@ -155,6 +151,10 @@ public class GameView extends RelativeLayout {
         super.draw(canvas);
     }
 
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+
+    }
 }
 
 

@@ -2,6 +2,8 @@ package com.example.projetppm;
 
 
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -11,7 +13,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -30,40 +34,13 @@ public class GameViewController extends Activity implements  Runnable{
 
         public  String TAG = "GAMEVIEWCONTROLLER";
 
-
-
         public Map<TypeOfRoad, String> NAMES  ;
-
-
-
-
-
 
         public Size sizeIm = new Size(400, 100);
         public static float alpha = (float) 75.96;
         public static float factor  = (float) ( 309.96/398.52);
 
-
         public boolean SoundOnOff = true;
-
-
-//        // var mvc : MessageViewController
-//        let mvc : MessageViewController = {
-//                let mvc = MessageViewController()
-//
-//                mvc.modalTransitionStyle = .flipHorizontal
-//        mvc.modalPresentationStyle = .fullScreen
-//
-//        return mvc
-//    }()
-
-
-//        let scoreViewController : ScoreViewController = {
-//                var sv = ScoreViewController()
-//                sv.modalTransitionStyle = .coverVertical
-//        return sv
-//    } ()
-
 
         public Thread thread ;
         public long duration ;
@@ -72,7 +49,6 @@ public class GameViewController extends Activity implements  Runnable{
         public HumanInterfaceView hv;
         public ThreeDRoadModel modelRoad;
         public ThreeDRoadViewController threeDRoadVC  ;
-
 
         public boolean gameIsStoped = true;
 
@@ -90,6 +66,13 @@ public class GameViewController extends Activity implements  Runnable{
         super.onCreate(savedInstanceState);
 
         Log.d(TAG, "view on create");
+        setContentView(R.layout.game_view);
+
+        gv = (GameView) findViewById(R.id.game_view_id);
+        hv = (HumanInterfaceView) findViewById(R.id.human_interface_view_id);
+
+
+        Log.d(TAG, hv.toString());
 
         NAMES = new HashMap<TypeOfRoad, String>();
         NAMES.put(TypeOfRoad.STRAIGHT ,"pave");
@@ -104,7 +87,7 @@ public class GameViewController extends Activity implements  Runnable{
         duration = Config.DURATION;
         //init du model 3D
 
-        float r = sizeIm.getHeight()/sizeIm.getWidth();
+        float r = (float)sizeIm.getHeight()/(float)sizeIm.getWidth();
         Point p = new Point();
         getWindowManager().getDefaultDisplay().getSize(p);
 
@@ -119,25 +102,18 @@ public class GameViewController extends Activity implements  Runnable{
         Point posOfCharacter = modelRoad.getCenter(thePosition.x, thePosition.y);
 
 
-        hv = new HumanInterfaceView(getBaseContext());
-        gv = new GameView(getBaseContext(), duration, posOfCharacter, Config.sizeChar);
+        hv.init();
+        gv.init(duration,posOfCharacter, Config.sizeChar);
 
-
-
-        setContentView(R.layout.human_interface_view);
-        setContentView(R.layout.game);
-
-
-        threeDRoadVC = new ThreeDRoadViewController(NAMES, duration, modelRoad, Config.NB_ROWS);
-
-
+        threeDRoadVC = new ThreeDRoadViewController( NAMES, duration, modelRoad, Config.NB_ROWS);
+        threeDRoadVC.init(this, (RelativeLayout) findViewById(R.id.road_view));
     }
 
 
     @Override
     protected void onStart() {
         super.onStart();
-
+        
         hv.animationForNumber();
 
         startTheGame();
@@ -149,7 +125,7 @@ public class GameViewController extends Activity implements  Runnable{
     @Override
     public void run() {
         while(!gameIsStoped) {
-            updateView();
+           // updateView();
            // gv.draw();
             sleep();
         }
@@ -321,8 +297,8 @@ public class GameViewController extends Activity implements  Runnable{
 
 
                 Frame f = modelRoad.addObj(newObject, type, colonne + modelRoad.iMin , 0);
-                //modelRoad.initAnimation(elem: f);
-                //modelRoad.startAnimation(elem: f);
+                modelRoad.initAnimation(f);
+                modelRoad.startAnimation(f);
             }
         }
 

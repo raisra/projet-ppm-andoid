@@ -8,8 +8,6 @@ import androidx.annotation.RequiresApi;
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class Config {
 
-
-
     public static int DISTANCE_OF_MAGNET = 5;
     public static double  TTL_POWER = 5.0;
     public static boolean  COINS_ARE_ANIMATED = false;
@@ -22,11 +20,6 @@ public class Config {
     public static long  DURATION = 300;
     //the size of the uiview representing the character;
     public static Size sizeChar  = new Size(300, 675);
-
-
-
-
-
 
 
     public static long JUMP_DURATION = 1000;

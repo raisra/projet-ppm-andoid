@@ -1,11 +1,14 @@
 package  com.example.projetppm.ThreeDRoad;
 
-import android.graphics.Bitmap;
+import android.animation.AnimatorSet;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.Size;
 import android.view.View;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 
 import androidx.annotation.RequiresApi;
@@ -51,19 +54,19 @@ public class ThreeDRoadModel extends ModelRoad {
                 f.xTranslate = x;
                 f.setType(TypeOfRoad.EMPTY);
 
-               // initAnimation(f);
+                initAnimation(f);
             }
         }
         for(int k=0 ; k<= super.nRows ; k++) {
             Frame f = this.getObj(0, k);
 
-            Rect fr = computeFrame(nRows-k);
+            Point fr = computeTopLeft(nRows-k);
             long s = computeSpeed();
             float o = computeOpacity(nRows-k);
             float sc = 1/factor;
             float y = computeYTranslation(nRows - k);
             Size size = computeSize( nRows - k);
-            f.frame = fr;
+            f.topLeft = fr;
             f.duration = s;
             f.opacity = o;
             f.scaleH = sc;
@@ -74,7 +77,7 @@ public class ThreeDRoadModel extends ModelRoad {
             f.setType(TypeOfRoad.EMPTY);
             f.index = nRows - k;
             f.index_j = -1;
-           // initAnimation(f);
+            initAnimation(f);
         }
 
     }
@@ -108,16 +111,12 @@ public class ThreeDRoadModel extends ModelRoad {
     }
 
      @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-     public Rect computeFrame(int index){
-
+     public Point computeTopLeft(int index){
          int i = nRows - index;
          float f = linearNoCenter(0, i);
          float h = F(i-1)-F(i);
 
-
-         return new Rect((int)f, (int)(heightOfScreen - F(i-1)), (int)(f + size0.getWidth()) , (int)(heightOfScreen - F(i)));
-
-
+         return new Point((int)f, (int)(heightOfScreen - F(i-1)));
     }
 
 
@@ -190,23 +189,13 @@ public class ThreeDRoadModel extends ModelRoad {
 
 
             case BRIDGE:
+            case PASSAGE:
+            case TREE:
+            case EMPTY:
+            case TURN_RIGHT:
+            case TURNLEFT:
             nextPossibleType = new TypeOfRoad[]{TypeOfRoad.STRAIGHT};
             break;
-            case PASSAGE:
-                nextPossibleType = new TypeOfRoad[]{TypeOfRoad.STRAIGHT};
-                break;
-            case TREE:
-                nextPossibleType = new TypeOfRoad[]{TypeOfRoad.STRAIGHT};
-                break;
-            case EMPTY:
-                nextPossibleType = new TypeOfRoad[]{TypeOfRoad.STRAIGHT};
-                break;
-            case TURN_RIGHT:
-                nextPossibleType = new TypeOfRoad[]{TypeOfRoad.STRAIGHT};
-                break;
-            case TURNLEFT:
-                nextPossibleType = new TypeOfRoad[]{TypeOfRoad.STRAIGHT};
-                break;
 
             default:
             nextPossibleType = new TypeOfRoad[]{TypeOfRoad.STRAIGHT};
@@ -264,7 +253,7 @@ public class ThreeDRoadModel extends ModelRoad {
 
 
     public void startAnimation(Frame elem){
-       // elem.view?.layer.add(elem.transformation!, forKey: "translationAndResize")
+       elem.view.startAnimation(elem.transformation);
     }
 
 
@@ -272,7 +261,7 @@ public class ThreeDRoadModel extends ModelRoad {
     public Frame removeObject(int i , int j, Type type){
         Frame r = super.removeObject(i,j,type);
         if(r!=null) {
-            r.view.setVisibility(View.INVISIBLE);
+            r.view.clearAnimation();
         }
         return r;
     }
@@ -280,6 +269,7 @@ public class ThreeDRoadModel extends ModelRoad {
     /**
     completion : la methode à effectuer en cas de sortie d'une piece de l'ecran
      */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void movedown(){
 
         //suppression de la derniere ligne
@@ -304,6 +294,12 @@ public class ThreeDRoadModel extends ModelRoad {
 
                 obj.view = prevObj.view;
                 obj.type = prevObj.type;
+
+                obj.view.getLayoutParams().width = obj.size.getWidth();
+                obj.view.getLayoutParams().height = obj.size.getHeight();
+
+                obj.view.setX(obj.topLeft.x);
+                obj.view.setY(obj.topLeft.y);
 
                 j -= 1;
             }
@@ -349,13 +345,20 @@ public class ThreeDRoadModel extends ModelRoad {
         return this.getObj(0, nRows-nbElements+1);
     }
 
+
+
     public boolean isFirst(Frame elem)  {
         return elem.index == 0;
     }
 
+
+
     public int getIndex(Frame elem){
         return elem.index;
     }
+
+
+
 
     public Frame getFirst(){
         if (nbElements == 0) {
@@ -379,5 +382,27 @@ public class ThreeDRoadModel extends ModelRoad {
         ret += "&&&&&&&&&&&&&&&&&&&&";
                 return ret;
     }
+
+
+
+    public void initAnimation(Frame elem){
+
+        TranslateAnimation translate = new TranslateAnimation(elem.topLeft.x, elem.topLeft.x+elem.xTranslate,
+                elem.topLeft.y, elem.topLeft.y+elem.yTranslate);
+
+
+        ScaleAnimation scale = new ScaleAnimation(1, elem.scaleW, 1,elem.scaleH);
+
+        translate.setDuration(duration);
+        scale.setDuration(duration);
+
+        AnimationSet set = new AnimationSet(false);
+        set.addAnimation(translate);
+        set.addAnimation(scale);
+
+        elem.transformation = set;
+    }
+
+
 
 }

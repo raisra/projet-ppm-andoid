@@ -10,20 +10,16 @@ package com.example.projetppm;
 
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
-import android.os.Build;
 import android.util.AttributeSet;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
-import java.util.function.Function;
-
-public class HumanInterfaceView extends View {
+public class HumanInterfaceView extends ConstraintLayout {
 
     //nombre de pieces réscoltées
     public int score = 0;
@@ -43,23 +39,27 @@ public class HumanInterfaceView extends View {
     Button messageButton;
     Button startButton;
 
-    public HumanInterfaceView(Context context) {
-        super(context);
+    ImageView counterView;
 
 
-        scoreLabel =  findViewById(R.id.score_label);
-        pauseButton = findViewById(R.id.pause_button);
-        startButton = findViewById(R.id.start_button);
-        messageButton = findViewById(R.id.message_button);
-
+    public HumanInterfaceView(Context context, AttributeSet set) {
+        super(context, set);
     }
 
+    public void init(){
+        scoreLabel =  findViewById(R.id.score_label_id);
+        pauseButton = findViewById(R.id.pause_button_id);
+        startButton = findViewById(R.id.start_button_id);
+        messageButton = findViewById(R.id.message_button_id);
+        counterView = findViewById(R.id.counter_view_id);
 
+        counterView.setBackgroundResource(R.drawable.animation_start_count);
+    }
 
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
-
-
-
+    }
 
 
     public int getScore() {
@@ -84,9 +84,7 @@ public class HumanInterfaceView extends View {
 
 
     public void animationForNumber() {
-
-        ImageView counterView = findViewById(R.id.counter_view);
-        counterView.getAnimation().start();
+        ((AnimationDrawable)counterView.getBackground()).start();
        // Animation animation = AnimationUtils.loadAnimation(getContext(),R.drawable.start_count_animation);
     }
 

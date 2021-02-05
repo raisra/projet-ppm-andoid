@@ -1,23 +1,37 @@
 package com.example.projetppm.ThreeDRoad;
 
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import com.example.projetppm.Frame;
+import com.example.projetppm.R;
 import com.example.projetppm.Type;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-public class ThreeDRoadViewController extends FragmentActivity {
+import static android.os.Build.VERSION_CODES.P;
 
+public class ThreeDRoadViewController {
+
+    public RelativeLayout roadView;
+    public Context ctx;
     public   Map<TypeOfRoad, String> names;
 
     public String TAG = "THReeDRoadViewController";
@@ -42,7 +56,12 @@ public class ThreeDRoadViewController extends FragmentActivity {
         super();
     }
 
-    public ThreeDRoadViewController(Map<TypeOfRoad, String> names, long duration, ThreeDRoadModel model3D, int N){
+    public  void init(Context ctx,RelativeLayout roadView) {
+        this.roadView = roadView;
+        this.ctx = ctx;
+    }
+
+    public ThreeDRoadViewController( Map<TypeOfRoad, String> names, long duration, ThreeDRoadModel model3D, int N){
         super();
         this.N = N;
         this.names = names;
@@ -57,6 +76,9 @@ public class ThreeDRoadViewController extends FragmentActivity {
     }
 
 
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
 
 
     public void updateDuration(long d){
@@ -68,8 +90,8 @@ public class ThreeDRoadViewController extends FragmentActivity {
     }
 
     private Bitmap getBitMap(String name){
-        int imgId = getResources().getIdentifier(name, "drawable", getPackageName());
-        Bitmap image = BitmapFactory.decodeResource(getResources(), imgId);
+        int imgId = ctx.getResources().getIdentifier(name, "drawable", ctx.getPackageName());
+        Bitmap image = BitmapFactory.decodeResource(ctx.getResources(), imgId);
         return  image;
     }
 
@@ -78,8 +100,8 @@ public class ThreeDRoadViewController extends FragmentActivity {
 
         Bitmap image = getBitMap(name);
         if( image != null ){
-            ImageView img = new ImageView(getBaseContext());
-            img.setBackground(new BitmapDrawable(getResources(), image));
+            ImageView img = new ImageView(ctx);
+            img.setBackground(new BitmapDrawable(ctx.getResources(), image));
             buffer.add(new Pair<>(img, ofType));
         }
         else {
@@ -87,8 +109,8 @@ public class ThreeDRoadViewController extends FragmentActivity {
 
             image = getBitMap(name + "_" + String.valueOf(i));
             while( image != null){
-                ImageView img = new ImageView(getBaseContext());
-                img.setBackground(new BitmapDrawable(getResources(), image));
+                ImageView img = new ImageView(ctx);
+                img.setBackground(new BitmapDrawable(ctx.getResources(), image));
                 buffer.add(new Pair<>(img, ofType));
                 i++;
             }
@@ -101,6 +123,7 @@ public class ThreeDRoadViewController extends FragmentActivity {
      ajouter les à la vue principale
      commencer les animations
      */
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void startTheGame(){
         model3D.deleteAllRoad();
         for (int i =0 ; i< N; i++) {
@@ -116,6 +139,7 @@ public class ThreeDRoadViewController extends FragmentActivity {
 
 
     //get called by the timer every duration
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void createRoad(TypeOfRoad withType, Level level){
 
         TypeOfRoad t =  withType;
@@ -144,14 +168,25 @@ public class ThreeDRoadViewController extends FragmentActivity {
         Frame frame = model3D.append(pair.first, pair.second);
 
         if (frame != null) {
-          //  model3D.initAnimation(frame);
-           // model3D.startAnimation(frame);
+            ImageView img = pair.first;
+            img.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(frame.size.getWidth(), frame.size.getHeight());
+            img.setLayoutParams(layoutParams);
+            img.setX(frame.topLeft.x);
+            img.setY(frame.topLeft.y);
+
+            roadView.addView(img);
+
+            model3D.initAnimation(frame);
+            model3D.startAnimation(frame);
 
             buffer.remove(0);
         }
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void turn (Level level) {
         model3D.deleteAllRoad();
         buffer.clear();
@@ -159,19 +194,17 @@ public class ThreeDRoadViewController extends FragmentActivity {
         goingToTurn = false;
         stopCoins = false;
 
-        for(int i = 1 ; i< 5 ; i++) {
+        for(int i = 0 ; i< 5 ; i++) {
             createRoad(TypeOfRoad.STRAIGHT, level);
         }
 
-        for(int i = 1 ; i< N ; i++) {
+        for(int i = 0 ; i< N ; i++) {
             createRoad(null, level);
         }
     }
 
 
-    public void setDuration(long duration) {
-        this.duration = duration;
-    }
+
 }
 
 

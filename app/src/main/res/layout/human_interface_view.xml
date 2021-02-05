@@ -1,47 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 
-<com.example.projetppm.HumanInterfaceView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.example.projetppm.HumanInterfaceView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/human_interface_id"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
 
-
     <Button
-        android:id="@+id/message_button"
+        android:id="@+id/message_button_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginTop="8dp"
         android:onClick="seeMessage"
         android:text="Message"
-        android:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/score_label"
+        android:id="@+id/score_label_id"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/pause_button"
-
-        android:layout_width="88dp"
-        android:layout_height="48dp"
+        android:id="@+id/pause_button_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
         android:onClick="pauseGame"
         android:text="Pause"
-        android:visibility="invisible"
         app:icon="@drawable/icon_pause_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -51,12 +42,13 @@
         app:layout_constraintVertical_bias="0.522" />
 
     <Button
-        android:id="@+id/start_button"
-        android:layout_width="88dp"
-        android:layout_height="48dp"
+        android:id="@+id/start_button_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableBottom="@drawable/icon_start_button"
+        android:foregroundGravity="center"
         android:onClick="startGame"
         android:text="Button"
-        android:visibility="invisible"
         app:icon="@drawable/icon_start_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -66,15 +58,18 @@
         app:layout_constraintVertical_bias="0.522" />
 
     <ImageView
-        android:id="@+id/counter_view"
-        android:layout_width="113dp"
-        android:layout_height="266dp"
+        android:id="@+id/counter_view_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.498"
-        app:srcCompat="@drawable/start_count_animation" />
+
+        app:srcCompat="@drawable/animation_start_count" />
 
 
 </com.example.projetppm.HumanInterfaceView>

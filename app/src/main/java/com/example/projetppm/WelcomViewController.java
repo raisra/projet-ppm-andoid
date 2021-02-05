@@ -25,6 +25,7 @@ public class WelcomViewController extends AppCompatActivity {
     public void startGame(View view){
         Intent intent = new Intent(view.getContext(), GameViewController.class);
         startActivity(intent);
+        finish();
     }
 
 
