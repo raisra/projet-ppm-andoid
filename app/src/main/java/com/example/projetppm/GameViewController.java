@@ -58,9 +58,9 @@ public class GameViewController extends Activity {
     public int thePosition[]  ;
     public ImageView backGround ;
 
-//        public SoundManager soundManager;
-//        public GestureManager gestureManager;
-//        public MotionManager motionManager ;
+    //        public SoundManager soundManager;
+    //        public GestureManager gestureManager;
+    //        public MotionManager motionManager ;
 
 
     @Override
@@ -120,6 +120,11 @@ public class GameViewController extends Activity {
             @Override
             public void run() {
                 updateView();
+                gv.invalidate();
+                hv.invalidate();
+                if (gv.character.getVisibility() == View.INVISIBLE){
+                    Log.d(TAG, "run: the character shouldn't be invisible");
+                }
             }
         }, 0, 1000);
     }
@@ -253,22 +258,23 @@ public class GameViewController extends Activity {
             newObject.setVisibility(View.VISIBLE);
             initView(newObject,name, animated);
 
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    gv.objectsView.addView(newObject);
-                }
-            });
+
 
             //TODO sendtoback ne fonctionne pas pourquoi???????????
             // newObject.sendToBack();
 
 
+
+
             Frame f = modelRoad.addObj(newObject, type, colonne + modelRoad.iMin , 0);
             ModelRoad.setlayout(newObject, f.size, f.topLeft);
+            gv.objectsView.addView(newObject);
             startAnimation(f);
+            Log.d(TAG, "&&&&&&&&&&&&&&&&&&&&&&&run: Hello from run " + this);
+
         }
     }
+
 
 
 
@@ -372,18 +378,24 @@ public class GameViewController extends Activity {
         TypeOfRoad lastElemType = (TypeOfRoad)modelRoad.getLastElem().type;
         Log.d(TAG, "updateView: le dernier element est " +lastElemType.toString());
         if (!threeDRoadVC.stopGeneratingCoins() && (lastElemType == TypeOfRoad.STRAIGHT || lastElemType == TypeOfRoad.BRIDGE)){
-            createObject();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    createObject();
+                };
+            });
+
         }
 
         modelRoad.movedown();
+
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 threeDRoadVC.createRoad(null, level);
-            }
+            };
         });
-
 
         //vérifie s'il y a des pouvoirs en cours d'execution
         //met à jour le timer
@@ -436,9 +448,9 @@ public class GameViewController extends Activity {
 
 
                 //a la fin de l'animation, ajout de l'icone du pouvoir à l'emplacement réservé dans HumanInterface
-//                    cb = {(Bool) in
-//                            //declenchement du timer pendant 10s
-//                            self.TTL.append((magnet, TTL_POWER))
+                //                    cb = {(Bool) in
+                //                            //declenchement du timer pendant 10s
+                //                            self.TTL.append((magnet, TTL_POWER))
                 //self.hv.addPower(powerView: obj.view!, duration: TTL_POWER)
                 //print("add the power now")
                 //}
@@ -460,73 +472,73 @@ public class GameViewController extends Activity {
 
 
 
-//        func handlePower(){
-//
-//            //si un aucun poucoir n'est en cours d'execution on ne fait rien
-//            if(TTL.isEmpty) {return}
-//
-//            var i = 0
-//            while i<TTL.count  {
-//                let (power, ttl) = TTL.first!
-//                //si le pouvoir a fini de s'executer
-//                if ttl <= 0 {
-//                    print("le pouvoir \(power) est terminé")
-//                    //un pouvoir est enclenché
-//                    TTL.remove(at: 0)
-//
-//                    continue
-//                }
-//
-//                let timeToLive = ttl - duration!
-//                        TTL[0].1 = timeToLive
-//                aa += 1
-//
-//                switch power {
-//
-//                    case magnet:
-//                        //attirer les pieces situé dans le voisinage
-//                        //on commence par retirer les pieces concernées du chemin
-//
-//
-//                        for i in 0..<modelRoad.nColumns {
-//                        for neighborhood in 1 ... DISTANCE_OF_MAGNET {
-//                            //on tente de retirer les pieces situées dans le voisinage du personnage
-//                            let coin = modelRoad.removeObject(i: i, j: thePosition.1 - neighborhood, type: coin).view
-//
-//                            //si on trouve une piece
-//                            if coin != nil {
-//                                //on deplace la piece vers le personnage
-//                                moveObjToPoint(coin!,
-//                                        point: gv.character.center,
-//                                        withDuration: 1,
-//                                        options: .curveEaseIn,
-//                                        cb : {_ in
-//                                    coin!.isHidden = true
-//                                    self.coins.insert(coin!)
-//                                }
-//                            )
-//
-//                                //TODO faire un mouvement plus naturel
-//                                //Peut etre animation suivant une courbe de bezier
-//                            }
-//                        }
-//                    }
-//                    break
-//
-//                    case transparency:
-//                        //le personnage devient mi-transparent
-//                        //il devient capable de traverser les obstacles
-//                        gv.character.alpha = 0.5
-//                        break
-//
-//                    default:
-//                        print("handlePower : ne devrait jamais safficher")
-//                }
-//
-//                i += 1
-//            }
-//
-//        }
+    //        func handlePower(){
+    //
+    //            //si un aucun poucoir n'est en cours d'execution on ne fait rien
+    //            if(TTL.isEmpty) {return}
+    //
+    //            var i = 0
+    //            while i<TTL.count  {
+    //                let (power, ttl) = TTL.first!
+    //                //si le pouvoir a fini de s'executer
+    //                if ttl <= 0 {
+    //                    print("le pouvoir \(power) est terminé")
+    //                    //un pouvoir est enclenché
+    //                    TTL.remove(at: 0)
+    //
+    //                    continue
+    //                }
+    //
+    //                let timeToLive = ttl - duration!
+    //                        TTL[0].1 = timeToLive
+    //                aa += 1
+    //
+    //                switch power {
+    //
+    //                    case magnet:
+    //                        //attirer les pieces situé dans le voisinage
+    //                        //on commence par retirer les pieces concernées du chemin
+    //
+    //
+    //                        for i in 0..<modelRoad.nColumns {
+    //                        for neighborhood in 1 ... DISTANCE_OF_MAGNET {
+    //                            //on tente de retirer les pieces situées dans le voisinage du personnage
+    //                            let coin = modelRoad.removeObject(i: i, j: thePosition.1 - neighborhood, type: coin).view
+    //
+    //                            //si on trouve une piece
+    //                            if coin != nil {
+    //                                //on deplace la piece vers le personnage
+    //                                moveObjToPoint(coin!,
+    //                                        point: gv.character.center,
+    //                                        withDuration: 1,
+    //                                        options: .curveEaseIn,
+    //                                        cb : {_ in
+    //                                    coin!.isHidden = true
+    //                                    self.coins.insert(coin!)
+    //                                }
+    //                            )
+    //
+    //                                //TODO faire un mouvement plus naturel
+    //                                //Peut etre animation suivant une courbe de bezier
+    //                            }
+    //                        }
+    //                    }
+    //                    break
+    //
+    //                    case transparency:
+    //                        //le personnage devient mi-transparent
+    //                        //il devient capable de traverser les obstacles
+    //                        gv.character.alpha = 0.5
+    //                        break
+    //
+    //                    default:
+    //                        print("handlePower : ne devrait jamais safficher")
+    //                }
+    //
+    //                i += 1
+    //            }
+    //
+    //        }
 
 
 
@@ -548,8 +560,13 @@ public class GameViewController extends Activity {
 
 
     public void startAnimation(Frame elem){
+        if(elem.view==null){
+            Log.d(TAG, "SHOULD NOT BE HERE startAnimation: " + elem);
+        }
         elem.view.startAnimation(elem.transformation);
     }
+
+
 }
 
 

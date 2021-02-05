@@ -1,6 +1,7 @@
 package com.example.projetppm.ThreeDRoad;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -29,7 +30,7 @@ import java.util.Map;
 
 import static android.os.Build.VERSION_CODES.P;
 
-public class ThreeDRoadViewController {
+public class ThreeDRoadViewController  {
 
     public RelativeLayout roadView;
     public Context ctx;
@@ -186,9 +187,7 @@ public class ThreeDRoadViewController {
 
             roadView.addView(img);
 
-
             startAnimation(frame);
-
             buffer.remove(0);
 
             Log.d(TAG, "createRoad: append the road of type " + pair.second.toString());

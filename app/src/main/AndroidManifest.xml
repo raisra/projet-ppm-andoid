@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.projetppm">
 
+
     <application
         android:isGame="true"
         android:allowBackup="true"

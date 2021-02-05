@@ -21,7 +21,7 @@ import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-public class HumanInterfaceView extends ConstraintLayout {
+public class HumanInterfaceView extends ConstraintLayout implements  Game {
 
     public String TAG = "HumanInterfaceView";
     //nombre de pieces réscoltées

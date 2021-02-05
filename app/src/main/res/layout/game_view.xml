@@ -20,7 +20,6 @@
         android:id="@+id/road_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
     </RelativeLayout>
 
 
@@ -28,9 +27,7 @@
         android:id="@+id/objects_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
     </RelativeLayout>
-
 
 
     <ImageView
@@ -44,13 +41,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.991" />
-
-
     <include
         layout="@layout/human_interface_view"
         android:id="@+id/human_interface_view_id"
         android:visibility="gone"
-
         />
 
 </com.example.projetppm.GameView>

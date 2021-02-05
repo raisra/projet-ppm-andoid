@@ -24,29 +24,49 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.RequiresApi;
 
-public class GameView extends ViewGroup {
+public class GameView extends RelativeLayout implements Game{
 
     public String TAG = "GAMEVIEW";
-    // la vue contenant tous les objets
+    /*
+    La vue contenant le personnage
+     */
     public ImageView character ;
+    /*
+    la vue contenant les objets pieces et autres pouvoirs
+     */
     public RelativeLayout objectsView ;
 
+    /**
+     * Les animations
+     */
     AnimationDrawable jumpAnimation;
     AnimationDrawable runAnimation;
 
+    /**
+     * la durée d'une animation
+     */
     public long speed ;
 
+    /**
+     * Constructeur par défaut appelé automatiquement qd la vue est généré à partir de son fichier xml
+     * @param context
+     * @param set
+     */
     public GameView(Context context, AttributeSet set) {
         super(context, set);
     }
 
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    /**
+     * Init de la vue
+     */
     public void init(long s, Point centerOfChar, Size sizeOfChar){
         this.speed = s;
         character = (ImageView) findViewById(R.id.character_view_id);
         objectsView = (RelativeLayout) findViewById(R.id.objects_view);
         
-        character.setBackgroundResource(R.drawable.animation_char_run);
+
         initPersonnage(centerOfChar, sizeOfChar);
 
         Log.d(TAG, "init: gameView");
@@ -54,30 +74,33 @@ public class GameView extends ViewGroup {
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    /**
+     * Init de a vue du personnage. Init de l'animation du personnage
+     */
     private void initPersonnage(Point center , Size size)  {
         Point topLeft = new Point(center.x - size.getWidth()/2, center.y - size.getHeight()/2);
         ModelRoad.setlayout(character,size,topLeft);
         character.setVisibility(INVISIBLE);
-        runAnimation = (AnimationDrawable) character.getBackground();
+
+        jumpAnimation = (AnimationDrawable)getResources().getDrawable( R.drawable.animation_char_jump );
+        jumpAnimation.setOneShot(true);
+        runAnimation = (AnimationDrawable)getResources().getDrawable( R.drawable.animation_char_run );
+        runAnimation.setOneShot(false);
+
+        animationForRunning();
     }
 
 
 
     public void animationForJump() {
         runAnimation.stop();
-        character.setBackgroundResource(R.drawable.animation_char_jump);
-        jumpAnimation = (AnimationDrawable) character.getBackground();
-        jumpAnimation.setOneShot(true);
+        character.setBackground(jumpAnimation);
         jumpAnimation.start();
     }
 
 
     public void animationForRunning() {
-        jumpAnimation.stop();
-
-        character.setBackgroundResource(R.drawable.animation_char_run);
-        runAnimation = (AnimationDrawable) character.getBackground();
-        runAnimation.setOneShot(false);
+        character.setBackground(runAnimation);
         runAnimation.start();
     }
 
@@ -144,16 +167,6 @@ public class GameView extends ViewGroup {
         runAnimation.stop();
     }
 
-
-    @Override
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-
-    }
 }
 
 

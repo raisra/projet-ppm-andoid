@@ -21,7 +21,6 @@ public class Frame  {
     public ImageView view;
     public Size size;
     public Point topLeft;
-
     public float yTranslate = 0;
     public float xTranslate = 0;
     public long duration ;
@@ -30,9 +29,7 @@ public class Frame  {
     public int index  = 0 ;
     public int index_j = 0 ;
     public float opacity  = 0 ;
-
     public Type type ;
-
     public Animation transformation ;
 
     public void setView(ImageView view) {
@@ -41,9 +38,7 @@ public class Frame  {
 
     public void setTopLeft(Point topLeft) {this.topLeft = topLeft;}
 
-    public Point getTopLeft() {
-        return topLeft;
-    }
+    public Point getTopLeft() { return topLeft; }
 
     public void setSize(Size size) {
         this.size = size;
