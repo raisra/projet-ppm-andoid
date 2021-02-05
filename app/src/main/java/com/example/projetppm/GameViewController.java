@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
+import android.view.Display;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -38,9 +39,9 @@ public class GameViewController extends Activity {
 
     public  String TAG = "GAMEVIEWCONTROLLER";
 
-    public Size sizeIm = new Size(400, 100);
-    public static float alpha = (float) 75.96;
-    public static float factor  = (float) ( 309.96/398.52);
+    public Size sizeIm = Config.SIZEIM;
+    public static float alpha = Config.ALPHA;
+    public static float factor  = Config.FACTOR;
 
     public boolean SoundOnOff = true;
 
@@ -80,7 +81,10 @@ public class GameViewController extends Activity {
         Point p = new Point();
         getWindowManager().getDefaultDisplay().getSize(p);
 
-        sizeIm = new Size(p.x, (int) (sizeIm.getWidth() * r));
+        sizeIm = new Size(p.x, (int) (p.x * r));
+        Log.d(TAG, "(((((((((((onCreate: the size of teh image at 0"+ sizeIm);
+
+
         float D = (float) (sizeIm.getWidth() * Math.pow(factor, Config.NB_ROWS));
         Param param = new Param(Config.NB_ROWS, Config.NB_COLUMNS, p.x, D, 5, 50, sizeIm, factor, p.y);
 
@@ -93,6 +97,9 @@ public class GameViewController extends Activity {
 
         hv.init();
         gv.init(duration,posOfChar, Config.sizeChar);
+        Log.d(TAG, "-----------------------the size of char " + Config.sizeChar );
+        Log.d(TAG, "-----------------------the posiition of char " + posOfChar );
+        Log.d(TAG, "onCreate: POS of CHAR "+ gv.toString());
 
         threeDRoadVC = new ThreeDRoadViewController( Config.NAMES, duration, modelRoad, Config.NB_ROWS);
         threeDRoadVC.init(this, (RelativeLayout) findViewById(R.id.road_view));
@@ -116,6 +123,7 @@ public class GameViewController extends Activity {
         gameIsStoped = false;
 
         timer = new Timer();
+
         timer.scheduleAtFixedRate(new java.util.TimerTask() {
             @Override
             public void run() {
@@ -259,16 +267,10 @@ public class GameViewController extends Activity {
             initView(newObject,name, animated);
 
 
-
-            //TODO sendtoback ne fonctionne pas pourquoi???????????
-            // newObject.sendToBack();
-
-
-
-
             Frame f = modelRoad.addObj(newObject, type, colonne + modelRoad.iMin , 0);
             ModelRoad.setlayout(newObject, f.size, f.topLeft);
             gv.objectsView.addView(newObject);
+           // modelRoad.initAnimation(f);
             startAnimation(f);
             Log.d(TAG, "&&&&&&&&&&&&&&&&&&&&&&&run: Hello from run " + this);
 
@@ -357,12 +359,7 @@ public class GameViewController extends Activity {
             duration = duration - 10;
             threeDRoadVC.setDuration(duration);
 
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    updateView();
-                }
-            }, 0, duration);
+
 
             return;
         }
@@ -375,25 +372,21 @@ public class GameViewController extends Activity {
         }
 
 
-        TypeOfRoad lastElemType = (TypeOfRoad)modelRoad.getLastElem().type;
-        Log.d(TAG, "updateView: le dernier element est " +lastElemType.toString());
-        if (!threeDRoadVC.stopGeneratingCoins() && (lastElemType == TypeOfRoad.STRAIGHT || lastElemType == TypeOfRoad.BRIDGE)){
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    createObject();
-                };
-            });
-
-        }
-
-        modelRoad.movedown();
-
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 threeDRoadVC.createRoad(null, level);
+
+                TypeOfRoad lastElemType = (TypeOfRoad)modelRoad.getLastElem().type;
+                Log.d(TAG, "updateView: le dernier element est " +lastElemType.toString());
+                if (!threeDRoadVC.stopGeneratingCoins() && (lastElemType == TypeOfRoad.STRAIGHT || lastElemType == TypeOfRoad.BRIDGE)){
+                    createObject();
+                }
+
+                modelRoad.movedown();
+
+                threeDRoadVC.createRoad(null, level);
+
             };
         });
 
@@ -562,6 +555,7 @@ public class GameViewController extends Activity {
     public void startAnimation(Frame elem){
         if(elem.view==null){
             Log.d(TAG, "SHOULD NOT BE HERE startAnimation: " + elem);
+            return;
         }
         elem.view.startAnimation(elem.transformation);
     }

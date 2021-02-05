@@ -57,6 +57,8 @@ public class GameView extends RelativeLayout implements Game{
     }
 
 
+
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     /**
      * Init de la vue
@@ -166,6 +168,20 @@ public class GameView extends RelativeLayout implements Game{
         objectsView.setVisibility(INVISIBLE);
         runAnimation.stop();
     }
+
+
+    public String toString() {
+        String res = "";
+        res += "Char( x: " + character.getX();
+        res += ", y: " + character.getY() ;
+
+        res += ", w: " + character.getLayoutParams().width;
+        res += ", h: " + character.getLayoutParams().height;
+
+        res += ")";
+       return  res;
+    }
+
 
 }
 

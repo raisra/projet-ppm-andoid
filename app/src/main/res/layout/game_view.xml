@@ -34,13 +34,7 @@
         android:id="@+id/character_view_id"
         android:layout_width="168dp"
         android:layout_height="174dp"
-        android:src="@drawable/animation_char_run"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.991" />
+        android:src="@drawable/animation_char_run" />
     <include
         layout="@layout/human_interface_view"
         android:id="@+id/human_interface_view_id"

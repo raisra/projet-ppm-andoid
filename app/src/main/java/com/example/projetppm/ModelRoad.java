@@ -3,9 +3,11 @@ package com.example.projetppm;
 import android.annotation.SuppressLint;
 import android.graphics.Point;
 import android.os.Build;
+import android.util.Log;
 import android.util.Size;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.RequiresApi;
 
@@ -50,7 +52,7 @@ public class ModelRoad {
         this.W = p.W;
 
         this.D = p.D;
-        float d = this.D / p.nColumns;
+        this.d = p.D / p.nColumns;
         this.bSize = p.bSize;
         this.fSize = p.fSize;
 
@@ -84,6 +86,10 @@ public class ModelRoad {
         for (int k = 0; k <= nRows; k++) {
             for (int i = 0; i < nColumns; i++) {
                 // print("k:\(k) i:\(i) center:\(x)" )
+
+
+
+
                 Size s = new Size((int) G(k), (int) G(k));
                 float x = linearX(i, k) - s.getWidth()/2;;
                 float y = heightOfScreen - F(k) - s.getHeight()/2;
@@ -190,7 +196,12 @@ public class ModelRoad {
 
     @SuppressLint("NewApi")
     public static void setlayout(View v, Size size, Point topLeft) {
-        v.layout(topLeft.x, topLeft.y , topLeft.x + size.getWidth() , topLeft.y + size.getHeight());
+        RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(size.getWidth(), size.getHeight());
+        layoutParams.setMargins(topLeft.x, topLeft.y,0, 0);
+        v.setLayoutParams(layoutParams);
+       // v.layout(topLeft.x, topLeft.y , topLeft.x + size.getWidth() , topLeft.y + size.getHeight());
+
+        Log.d("SETLAYOUT", "setlayout: " + topLeft.x + " " + topLeft.y + " " + " " + size.getWidth() +  " " + size.getHeight());
     }
 
 

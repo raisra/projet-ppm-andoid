@@ -34,7 +34,6 @@ public class ThreeDRoadModel extends ModelRoad {
         this.duration0 = duration;
         float scale = (p.fSize - p.bSize)/p.nRows;
 
-
         for(int k=0  ; k<= super.nRows ; k++) {
             for(int i =super.iMin ; i<= super.iMax ; i++){
                 //
@@ -292,6 +291,7 @@ public class ThreeDRoadModel extends ModelRoad {
                     setlayout(obj.view, obj.size, obj.topLeft);
                 }
 
+                ThreeDRoadViewController.startAnimation(obj);
                 j -= 1;
             }
         }
@@ -391,7 +391,8 @@ public class ThreeDRoadModel extends ModelRoad {
         AnimationSet set = new AnimationSet(false);
         set.addAnimation(translate);
         set.addAnimation(scale);
-
+        set.setDuration(duration);
+        set.setFillAfter(true);
         elem.transformation = set;
     }
 

@@ -40,4 +40,9 @@ public class Config {
         NAMES.put(TypeOfRoad.TURNLEFT , "road_turn_left");
     }
 
+
+    public static Size SIZEIM = new Size(400, 100);
+    public static float ALPHA = (float) 75.96;
+    public static float FACTOR  = (float) ( 309.96/398.52);
+
 }

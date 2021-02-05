@@ -186,7 +186,8 @@ public class ThreeDRoadViewController  {
             ModelRoad.setlayout(img, frame.size, frame.topLeft);
 
             roadView.addView(img);
-
+            //TODO supprimer init animation
+            //model3D.initAnimation(frame);
             startAnimation(frame);
             buffer.remove(0);
 
@@ -214,8 +215,10 @@ public class ThreeDRoadViewController  {
 
 
 
-    public void startAnimation(Frame elem){
-        elem.view.startAnimation(elem.transformation);
+    public static void startAnimation(Frame elem){
+        if(elem.view != null) {
+            elem.view.startAnimation(elem.transformation);
+        }
     }
 
 
