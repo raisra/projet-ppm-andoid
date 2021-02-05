@@ -76,30 +76,27 @@ public class ModelRoad {
         /**Utile pour la génération des pieces */
         repeatCount = 0;
         prevRandomValue = new TypeOfObject[nColumns];
-        Arrays.fill(prevRandomValue, TypeOfObject.empty);// LE REMPLIR DE EMPTY
+        Arrays.fill(prevRandomValue, null);// LE REMPLIR DE EMPTY
 
         prevR = 0;
 
 
         for (int k = 0; k <= nRows; k++) {
             for (int i = 0; i < nColumns; i++) {
-                //
-                float x = linearX(i, k);
-
                 // print("k:\(k) i:\(i) center:\(x)" )
-                float y = heightOfScreen - F(k);
+                Size s = new Size((int) G(k), (int) G(k));
+                float x = linearX(i, k) - s.getWidth()/2;;
+                float y = heightOfScreen - F(k) - s.getHeight()/2;
 
                 Point o = new Point((int) x, (int) y);
-                Size s = new Size((int) G(k), (int) G(k));
-
                 Frame f = new Frame();
 
                 f.index = i;
                 f.index_j = k;
 
                 f.setSize(s);
-                f.setCenter(o);
-                f.setType(TypeOfObject.empty);
+                f.setTopLeft(o);
+                f.setType(null);
                 roadGrid[nColumns * k + i] = f;
             }
         }
@@ -162,7 +159,7 @@ public class ModelRoad {
         //suppression de la derniere ligne
         for (int i = iMin; i <= iMax; i++) {
             Frame obj = getObj(i, nRows);
-            if (obj.getType() != TypeOfObject.empty) obj.view.setVisibility(View.INVISIBLE);
+            if (obj.getType() != null) obj.view.setVisibility(View.INVISIBLE);
         }
 
         //decalage des case vers le bas
@@ -176,7 +173,7 @@ public class ModelRoad {
                 obj.type = prevObj.type;
 
                 View view = obj.view;
-                setlayout(view, obj.size, obj.center);
+                setlayout(view, obj.size, obj.topLeft);
 
                 j -= 1;
             }
@@ -186,20 +183,20 @@ public class ModelRoad {
         for (int i = iMin; i <= iMax; i++) {
             Frame obj = roadGrid[i];
             obj.view = null;
-            obj.type = TypeOfObject.empty;
+            obj.type = null;
         }
     }
 
 
     @SuppressLint("NewApi")
-    protected static void setlayout(View v, Size size, Point center) {
-        v.layout(center.x - size.getWidth() / 2, center.y - size.getHeight() / 2, center.x + size.getWidth() / 2, center.y + size.getHeight() / 2);
+    protected static void setlayout(View v, Size size, Point topLeft) {
+        v.layout(topLeft.x, topLeft.y , topLeft.x + size.getWidth() , topLeft.y + size.getHeight());
     }
 
 
     public Frame addObj(ImageView img, Type type, int i, int j) {
         Frame obj = getObj(i, j);
-       // setlayout(img, obj.size, obj.center);
+        setlayout(img, obj.size, obj.topLeft);
 
         obj.setView(img);
         obj.setType(type);
@@ -222,7 +219,7 @@ public class ModelRoad {
 
         Frame obj = getObj(i, j);
         if (obj.getType() == type || type == TypeOfObject.any) {
-            obj.setType(TypeOfObject.empty);
+            obj.setType(null);
             obj.view = null;
             return obj;
         }
@@ -230,10 +227,6 @@ public class ModelRoad {
         return null;
     }
 
-    public Point getCenter(int i, int j) {
-        Frame obj = getObj(i, j);
-        return obj.center;
-    }
 
     public int random(int lower, int upper) {
         return (int) (Math.random() * (upper - lower)) + lower;
@@ -256,7 +249,7 @@ public class ModelRoad {
 
 
         prevRandomValue = new TypeOfObject[nColumns - 2];
-        Arrays.fill(prevRandomValue, TypeOfObject.empty);
+        Arrays.fill(prevRandomValue, null);
 
 
         int r = random(1, nColumns - 2);
@@ -284,7 +277,7 @@ public class ModelRoad {
         } else {
             p = random(1, 100);
             TypeOfObject[] objPos = new TypeOfObject[iMax];
-            Arrays.fill(objPos, TypeOfObject.empty);
+            Arrays.fill(objPos, null);
 
             int r1 = random(0, iMax - 1);
             TypeOfObject t;
@@ -299,6 +292,14 @@ public class ModelRoad {
             return objPos;
         }
 
+    }
+
+
+
+
+
+    public  Point getTopLeft(int i, int k){
+        return getObj(i,k).getTopLeft();
     }
 }
 

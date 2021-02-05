@@ -20,7 +20,6 @@ import java.util.ArrayList;
 public class Frame  {
     public ImageView view;
     public Size size;
-    public Point center;
     public Point topLeft;
 
     public float yTranslate = 0;
@@ -42,8 +41,8 @@ public class Frame  {
 
     public void setTopLeft(Point topLeft) {this.topLeft = topLeft;}
 
-    public void setCenter(Point center) {
-        this.center = center;
+    public Point getTopLeft() {
+        return topLeft;
     }
 
     public void setSize(Size size) {

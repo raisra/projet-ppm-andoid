@@ -128,6 +128,7 @@ public class ThreeDRoadViewController {
         model3D.deleteAllRoad();
         for (int i =0 ; i< N; i++) {
             createRoad(TypeOfRoad.STRAIGHT, level);
+            Log.d(TAG, "startTheGame: "+nbElements);
         }
     }
 

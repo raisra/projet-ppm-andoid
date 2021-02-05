@@ -52,7 +52,7 @@ public class ThreeDRoadModel extends ModelRoad {
                 f.scaleW = sc;
                 f.yTranslate = y;
                 f.xTranslate = x;
-                f.setType(TypeOfRoad.EMPTY);
+                f.setType(null);
 
                 initAnimation(f);
             }
@@ -74,7 +74,7 @@ public class ThreeDRoadModel extends ModelRoad {
             f.yTranslate = y;
             f.xTranslate = 0;
             f.size = size;
-            f.setType(TypeOfRoad.EMPTY);
+            f.setType(null);
             f.index = nRows - k;
             f.index_j = -1;
             initAnimation(f);
@@ -94,6 +94,7 @@ public class ThreeDRoadModel extends ModelRoad {
 
 
 
+
     public void setDuration(long duration)  {
         this.duration = duration;
     }
@@ -106,9 +107,7 @@ public class ThreeDRoadModel extends ModelRoad {
         return getObj(0, nRows - i );
     }
 
-    public Point getCenter(int index) {
-        return getElemAtIndex(nRows - index).center;
-    }
+
 
      @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
      public Point computeTopLeft(int index){
@@ -237,8 +236,6 @@ public class ThreeDRoadModel extends ModelRoad {
 
     //ajoute à la verticiale
     public Frame append(ImageView im, Type type){
-
-
         if( (nRows - nbElements) < 0){
             return null;
         }
@@ -260,7 +257,7 @@ public class ThreeDRoadModel extends ModelRoad {
 
     public Frame removeObject(int i , int j, Type type){
         Frame r = super.removeObject(i,j,type);
-        if(r!=null) {
+        if(r!=null && r.type != null) {
             r.view.clearAnimation();
         }
         return r;
@@ -276,7 +273,8 @@ public class ThreeDRoadModel extends ModelRoad {
 
         for(int i =0 ; i<nColumns ; i++){
             Frame obj = getObj(i, nRows);
-            if (obj.getType() != TypeOfRoad.EMPTY ){
+            TypeOfRoad t = (TypeOfRoad) obj.getType();
+            if (t != null ){
                 obj.view.setVisibility(View.INVISIBLE);
             }
         }
@@ -295,11 +293,9 @@ public class ThreeDRoadModel extends ModelRoad {
                 obj.view = prevObj.view;
                 obj.type = prevObj.type;
 
-                obj.view.getLayoutParams().width = obj.size.getWidth();
-                obj.view.getLayoutParams().height = obj.size.getHeight();
-
-                obj.view.setX(obj.topLeft.x);
-                obj.view.setY(obj.topLeft.y);
+                if(obj.view!= null) {
+                    setlayout(obj.view, obj.size, obj.topLeft);
+                }
 
                 j -= 1;
             }
@@ -312,7 +308,7 @@ public class ThreeDRoadModel extends ModelRoad {
         for(int i =0 ; i<nColumns ; i++) {
             Frame obj = roadGrid[i];
             obj.view = null;
-            obj.type = TypeOfRoad.EMPTY;
+            obj.type = null;
         }
 
 
@@ -322,6 +318,7 @@ public class ThreeDRoadModel extends ModelRoad {
             nbElements = 0;
         }
     }
+
 
 
 

@@ -2,7 +2,6 @@ package com.example.projetppm;
 
 public enum  TypeOfObject implements Type {
     coin,
-    empty,
     coinx2,
     coinx5,
     magnet,

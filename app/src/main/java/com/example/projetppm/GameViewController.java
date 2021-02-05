@@ -34,7 +34,7 @@ public class GameViewController extends Activity implements  Runnable{
 
         public  String TAG = "GAMEVIEWCONTROLLER";
 
-        public Map<TypeOfRoad, String> NAMES  ;
+
 
         public Size sizeIm = new Size(400, 100);
         public static float alpha = (float) 75.96;
@@ -74,14 +74,6 @@ public class GameViewController extends Activity implements  Runnable{
 
         Log.d(TAG, hv.toString());
 
-        NAMES = new HashMap<TypeOfRoad, String>();
-        NAMES.put(TypeOfRoad.STRAIGHT ,"pave");
-        NAMES.put(TypeOfRoad.BRIDGE,"bridge");
-        NAMES.put(TypeOfRoad.EMPTY, "pave");
-        NAMES.put(TypeOfRoad.PASSAGE, "pave");
-        NAMES.put(TypeOfRoad.TREE, "tree");
-        NAMES.put(TypeOfRoad.TURN_RIGHT,"turnRight");
-        NAMES.put(TypeOfRoad.TURNLEFT , "turnLeft");
 
 
         duration = Config.DURATION;
@@ -99,67 +91,78 @@ public class GameViewController extends Activity implements  Runnable{
 
         //initialise la position du persinnage au mileu de l'ecran
         thePosition = new Point((modelRoad.iMax + modelRoad.iMin)/2 , Config.NB_ROWS - Config.INITIAL_CHAR_POSITION);
-        Point posOfCharacter = modelRoad.getCenter(thePosition.x, thePosition.y);
+
 
 
         hv.init();
-        gv.init(duration,posOfCharacter, Config.sizeChar);
+        gv.init(duration,thePosition, Config.sizeChar);
 
-        threeDRoadVC = new ThreeDRoadViewController( NAMES, duration, modelRoad, Config.NB_ROWS);
+        threeDRoadVC = new ThreeDRoadViewController( Config.NAMES, duration, modelRoad, Config.NB_ROWS);
         threeDRoadVC.init(this, (RelativeLayout) findViewById(R.id.road_view));
     }
 
 
+    public void  startTheGame(){
+        gv.showCharacter();
+        gv.startAnimation();
+
+        hv.pauseButton.setVisibility(View.INVISIBLE);
+        hv.messageButton.setVisibility(View.VISIBLE);
+        hv.startButton.setVisibility(View.INVISIBLE);
+        gv.objectsView.setVisibility(View.VISIBLE);
+
+        gameIsStoped = false;
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        
-        hv.animationForNumber();
+//        thread = new Thread(this);
+//        thread.start();
 
-        startTheGame();
-        threeDRoadVC.startTheGame();
+        run();
     }
 
+    public  void sleep(long duration) {
+//        try {
+//            //on attend 4 s le temps d'afficher le compteur
+//            Thread.sleep((long) duration);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+        try {
+            Thread.sleep(duration);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 
     @Override
     public void run() {
+
+        hv.animationForNumber();
+
+
+        sleep(4000);
+
+
+        startTheGame();
+        threeDRoadVC.startTheGame();
+
         while(!gameIsStoped) {
-           // updateView();
-           // gv.draw();
-            sleep();
+            updateView();
+            sleep(duration);
         }
+
+
     }
 
 
 
 
-    public void sleep(){
-        try {
-            Thread.sleep((long) duration);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void  startTheGame(){
-
-            gv.showCharacter();
-            gv.startAnimation();
-
-            hv.pauseButton.setVisibility(View.INVISIBLE);
-            hv.messageButton.setVisibility(View.VISIBLE);
-            hv.startButton.setVisibility(View.INVISIBLE);
-            gv.objectsView.setVisibility(View.VISIBLE);
-
-            gameIsStoped = false;
-            thread = new Thread(this);
-            thread.start();
-        }
-
-//        @objc func startGame() {
-//            startTheGame()
-//        }
 
 
         public void  pauseGame() throws InterruptedException {
@@ -219,7 +222,7 @@ public class GameViewController extends Activity implements  Runnable{
             }
 
         } else{
-            int imgId = getResources().getIdentifier("animation_"+"name", "drawable", getPackageName());
+            int imgId = getResources().getIdentifier("animation_" +name, "drawable", getPackageName());
             if (imgId == 0) {
                 return false;
             } else {
@@ -256,33 +259,34 @@ public class GameViewController extends Activity implements  Runnable{
                 boolean animated = false;
                 String name = null; //the name of the file cointaining the object to draw
 
+                if(type==null) continue;
+
                 switch(type) {
                     case coin:
                         //le model a créé une piece
                         animated = Config.COINS_ARE_ANIMATED;
-                        name = "coin";
+                        name = "icon_coin";
                         break;
 
                     case magnet :
                         //le model a créé un aimant
                         animated = false;
-                        name = "magnet";
+                        name = "icon_magnet";
                         break;
 
                     case coinx2 :
                         //le model a créé une piece+2
                         animated = Config.COINS_ARE_ANIMATED;
-                        name = "coin-x2";
+                        name = "icon_coin_x2";
                         break;
 
                     case coinx5 :
                         //le model a créé une piece+2
                         animated = Config.COINS_ARE_ANIMATED;
-                        name = "coin-x5";
+                        name = "icon_coin_x5";
                         break;
 
                     case any : continue;
-                    case empty: continue;
                     default: continue;
                 }
 
@@ -416,6 +420,8 @@ public class GameViewController extends Activity implements  Runnable{
            // Point p;
                     //callback a executer qd le personnage rencontre un object
            // var cb : ((Bool) -> ())?
+            if(obj.type == null) {return;}
+
             switch ((TypeOfObject)obj.type) {
 
                 case coin:

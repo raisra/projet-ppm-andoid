@@ -5,6 +5,11 @@ import android.util.Size;
 
 import androidx.annotation.RequiresApi;
 
+import com.example.projetppm.ThreeDRoad.TypeOfRoad;
+
+import java.util.HashMap;
+import java.util.Map;
+
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class Config {
 
@@ -26,4 +31,20 @@ public class Config {
     public static long BLINK_DURATION  = 5000;
     public static long MOVE_DURATION = 1000;
     public static long TRANSPARENCY_DURATION = 3000;
+
+
+
+
+
+    public static Map<TypeOfRoad, String> NAMES = new HashMap<TypeOfRoad, String>();
+    static {
+        NAMES.put(TypeOfRoad.STRAIGHT ,"road_pave");
+        NAMES.put(TypeOfRoad.BRIDGE,"road_bridge");
+        NAMES.put(TypeOfRoad.EMPTY, "road_pave");
+        NAMES.put(TypeOfRoad.PASSAGE, "road_pave");
+        NAMES.put(TypeOfRoad.TREE, "road_tree");
+        NAMES.put(TypeOfRoad.TURN_RIGHT,"road_turnRight");
+        NAMES.put(TypeOfRoad.TURNLEFT , "road_turnLeft");
+    }
+
 }
