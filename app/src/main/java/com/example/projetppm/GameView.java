@@ -40,19 +40,23 @@ public class GameView extends ViewGroup {
         super(context, set);
     }
 
-    public void init( long s, Point position, Size sizeOfChar){
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void init(long s, Point centerOfChar, Size sizeOfChar){
         this.speed = s;
         character = (ImageView) findViewById(R.id.character_view_id);
         objectsView = (RelativeLayout) findViewById(R.id.objects_view);
-
-        Log.d(TAG, "ici");
+        
         character.setBackgroundResource(R.drawable.animation_char_run);
-        initPersonnage(position, sizeOfChar);
+        initPersonnage(centerOfChar, sizeOfChar);
+
+        Log.d(TAG, "init: gameView");
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initPersonnage(Point center , Size size)  {
-        ModelRoad.setlayout(character,size,center);
+        Point topLeft = new Point(center.x - size.getWidth()/2, center.y - size.getHeight()/2);
+        ModelRoad.setlayout(character,size,topLeft);
         character.setVisibility(INVISIBLE);
         runAnimation = (AnimationDrawable) character.getBackground();
     }
@@ -109,7 +113,7 @@ public class GameView extends ViewGroup {
 
 
 
-    public AnimationDrawable updateDurationofAnimation(AnimationDrawable input, int duration){
+    private AnimationDrawable updateDurationofAnimation(AnimationDrawable input, int duration){
         AnimationDrawable output = new AnimationDrawable();
 
         for(int i = 0 ; i < input.getNumberOfFrames() ; i++)
@@ -128,21 +132,16 @@ public class GameView extends ViewGroup {
     }
 
 
-    public void startAnimation(){
+    public void startTheGame(){
+        character.setVisibility(VISIBLE);
+        objectsView.setVisibility(VISIBLE);
         runAnimation.start();
     }
 
-    public void stopAnimation(){
-        runAnimation.stop();
-    }
-
-
-    public void hideCharacter()  {
+    public void stopTheGame(){
         character.setVisibility(INVISIBLE);
-    }
-
-    public void showCharacter(){
-        character.setVisibility(VISIBLE);
+        objectsView.setVisibility(INVISIBLE);
+        runAnimation.stop();
     }
 
 

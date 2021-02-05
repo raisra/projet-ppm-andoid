@@ -11,9 +11,11 @@ package com.example.projetppm;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,6 +23,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 public class HumanInterfaceView extends ConstraintLayout {
 
+    public String TAG = "HumanInterfaceView";
     //nombre de pieces réscoltées
     public int score = 0;
 
@@ -34,10 +37,10 @@ public class HumanInterfaceView extends ConstraintLayout {
 
 
     TextView scoreLabel;
-    Button pauseButton;
+    ImageButton pauseButton;
 
-    Button messageButton;
-    Button startButton;
+    ImageButton messageButton;
+    ImageButton startButton;
 
     ImageView counterView;
 
@@ -54,6 +57,34 @@ public class HumanInterfaceView extends ConstraintLayout {
         counterView = findViewById(R.id.counter_view_id);
 
         counterView.setBackgroundResource(R.drawable.animation_start_count);
+
+
+
+        scoreLabel.setVisibility(INVISIBLE);
+        pauseButton.setVisibility(INVISIBLE);
+        startButton.setVisibility(INVISIBLE);
+        messageButton.setVisibility(INVISIBLE);
+        counterView.setVisibility(VISIBLE);
+
+        Log.d(TAG, "init: HumanInterfaceView");
+    }
+
+    public void startTheGame(){
+        scoreLabel.setVisibility(VISIBLE);
+        startButton.setVisibility(VISIBLE);
+        messageButton.setVisibility(VISIBLE);
+        counterView.setVisibility(INVISIBLE);
+
+        pauseButton.setVisibility(INVISIBLE);
+    }
+
+    public void stopTheGame(){
+        scoreLabel.setVisibility(INVISIBLE);
+        startButton.setVisibility(INVISIBLE);
+        messageButton.setVisibility(INVISIBLE);
+        counterView.setVisibility(INVISIBLE);
+
+        pauseButton.setVisibility(VISIBLE);
     }
 
     @Override
@@ -84,7 +115,8 @@ public class HumanInterfaceView extends ConstraintLayout {
 
 
     public void animationForNumber() {
-        ((AnimationDrawable)counterView.getBackground()).start();
+        AnimationDrawable anim = ((AnimationDrawable)counterView.getBackground());
+        anim.start();
        // Animation animation = AnimationUtils.loadAnimation(getContext(),R.drawable.start_count_animation);
     }
 

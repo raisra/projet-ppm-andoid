@@ -19,42 +19,44 @@ import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.fragment.app.FragmentActivity;
 
 import com.example.projetppm.ThreeDRoad.*;
 
 
+import java.sql.Time;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.example.projetppm.TypeOfObject.*;
 
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class GameViewController extends Activity implements  Runnable{
+public class GameViewController extends Activity {
 
-        public  String TAG = "GAMEVIEWCONTROLLER";
+    public  String TAG = "GAMEVIEWCONTROLLER";
 
+    public Size sizeIm = new Size(400, 100);
+    public static float alpha = (float) 75.96;
+    public static float factor  = (float) ( 309.96/398.52);
 
+    public boolean SoundOnOff = true;
 
-        public Size sizeIm = new Size(400, 100);
-        public static float alpha = (float) 75.96;
-        public static float factor  = (float) ( 309.96/398.52);
+    public Timer timer ;
+    public long duration ;
 
-        public boolean SoundOnOff = true;
+    public GameView gv ;
+    public HumanInterfaceView hv;
+    public ThreeDRoadModel modelRoad;
+    public ThreeDRoadViewController threeDRoadVC  ;
 
-        public Thread thread ;
-        public long duration ;
+    public boolean gameIsStoped = true;
 
-        public GameView gv ;
-        public HumanInterfaceView hv;
-        public ThreeDRoadModel modelRoad;
-        public ThreeDRoadViewController threeDRoadVC  ;
-
-        public boolean gameIsStoped = true;
-
-        //the position of the character on the screen grid
-        public Point thePosition  ;
-        public ImageView backGround ;
+    //the position of the character on the screen grid
+    public int thePosition[]  ;
+    public ImageView backGround ;
 
 //        public SoundManager soundManager;
 //        public GestureManager gestureManager;
@@ -71,11 +73,6 @@ public class GameViewController extends Activity implements  Runnable{
         gv = (GameView) findViewById(R.id.game_view_id);
         hv = (HumanInterfaceView) findViewById(R.id.human_interface_view_id);
 
-
-        Log.d(TAG, hv.toString());
-
-
-
         duration = Config.DURATION;
         //init du model 3D
 
@@ -90,74 +87,41 @@ public class GameViewController extends Activity implements  Runnable{
         modelRoad = new ThreeDRoadModel(param, duration);
 
         //initialise la position du persinnage au mileu de l'ecran
-        thePosition = new Point((modelRoad.iMax + modelRoad.iMin)/2 , Config.NB_ROWS - Config.INITIAL_CHAR_POSITION);
+        thePosition = new int[]{(modelRoad.iMax + modelRoad.iMin) / 2, Config.NB_ROWS - Config.INITIAL_CHAR_POSITION};
 
-
+        Point posOfChar = modelRoad.getCenter(thePosition[0], thePosition[1] );
 
         hv.init();
-        gv.init(duration,thePosition, Config.sizeChar);
+        gv.init(duration,posOfChar, Config.sizeChar);
 
         threeDRoadVC = new ThreeDRoadViewController( Config.NAMES, duration, modelRoad, Config.NB_ROWS);
         threeDRoadVC.init(this, (RelativeLayout) findViewById(R.id.road_view));
-    }
 
-
-    public void  startTheGame(){
-        gv.showCharacter();
-        gv.startAnimation();
-
-        hv.pauseButton.setVisibility(View.INVISIBLE);
-        hv.messageButton.setVisibility(View.VISIBLE);
-        hv.startButton.setVisibility(View.INVISIBLE);
-        gv.objectsView.setVisibility(View.VISIBLE);
-
-        gameIsStoped = false;
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-//        thread = new Thread(this);
-//        thread.start();
-
-        run();
+        startTheGame(null);
     }
 
-    public  void sleep(long duration) {
-//        try {
-//            //on attend 4 s le temps d'afficher le compteur
-//            Thread.sleep((long) duration);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
-        try {
-            Thread.sleep(duration);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
-    @Override
-    public void run() {
-
+    public void  startTheGame(View view){
         hv.animationForNumber();
+        //sleep(4000);
+        Log.d(TAG, "run: end of animation number");
 
-
-        sleep(4000);
-
-
-        startTheGame();
         threeDRoadVC.startTheGame();
+        gv.startTheGame();
+        hv.startTheGame();
+        gameIsStoped = false;
 
-        while(!gameIsStoped) {
-            updateView();
-            sleep(duration);
-        }
-
-
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new java.util.TimerTask() {
+            @Override
+            public void run() {
+                updateView();
+            }
+        }, 0, 1000);
     }
 
 
@@ -165,39 +129,37 @@ public class GameViewController extends Activity implements  Runnable{
 
 
 
-        public void  pauseGame() throws InterruptedException {
-            //TODO SAUVEGARDER LE niveau et la valeur du timer pr elancer le timer a la meme frequence
-            if(!gameIsStoped){
-                gameIsStoped = true;
-                thread.join();
-                gv.stopAnimation();
-                gv.objectsView.setVisibility(View.INVISIBLE);
 
-                hv.pauseButton.setVisibility(View.VISIBLE);
-            }
-            else {
-                //restart the game
-                thread.start();
-                gameIsStoped = false;
-                hv.pauseButton.setVisibility(View.INVISIBLE);
-                gv.objectsView.setVisibility(View.VISIBLE);
 
-            }
+
+
+    public void  stopTheGame(View view) throws InterruptedException {
+        //TODO SAUVEGARDER LE niveau et la valeur du timer pr elancer le timer a la meme frequence
+        if(!gameIsStoped){
+            gameIsStoped = true;
+            timer.cancel();
+            gv.stopTheGame();
+            hv.stopTheGame();
         }
-
-
-
-        //display the message view
-        public void seeMessage(){
-         //   Intent intent = new Intent(getBaseContext(), Message);
+        else {
+            //restart the game
+            startTheGame(view);
         }
+    }
+
+
+
+    //display the message view
+    public void seeMessage(){
+        //   Intent intent = new Intent(getBaseContext(), Message);
+    }
 
 
     @Override
     protected void onPause() {
         super.onPause();
         try {
-            pauseGame();
+            stopTheGame(findViewById(android.R.id.content).getRootView());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -215,7 +177,7 @@ public class GameViewController extends Activity implements  Runnable{
         if (!animated) {
             Bitmap img = getBitMap(name);
             if (img != null) {
-                view.setBackground(new BitmapDrawable(getResources(), img));
+                view.setImageDrawable(new BitmapDrawable(getResources(), img));
                 return true;
             } else {
                 return false;
@@ -230,8 +192,6 @@ public class GameViewController extends Activity implements  Runnable{
                 return true;
             }
         }
-
-
     }
 
 
@@ -243,239 +203,259 @@ public class GameViewController extends Activity implements  Runnable{
 
 
 
-        /**
-         genere aleatoirement un objet qur le parcours
-         */
-        public void  createObject(){
-            //on commence par générer un objet grace au model
-            TypeOfObject objs[] = modelRoad.generateNewObject(0);
+    /**
+     genere aleatoirement un objet qur le parcours
+     */
+    public void  createObject(){
+        //on commence par générer un objet grace au model
+        TypeOfObject objs[] = modelRoad.generateNewObject(0);
 
+        for(int colonne=0; colonne<modelRoad.iMax ; colonne++){
+            //le type de l'objet créé
+            TypeOfObject type= objs[colonne];
 
-            for ( int colonne=0; colonne<modelRoad.iMax ; colonne++){
-                //le type de l'objet créé
-                TypeOfObject type= objs[colonne];
+            boolean animated = false;
+            String name = null; //the name of the file cointaining the object to draw
 
+            if(type==null) continue;
 
-                boolean animated = false;
-                String name = null; //the name of the file cointaining the object to draw
+            switch(type) {
+                case coin:
+                    //le model a créé une piece
+                    animated = Config.COINS_ARE_ANIMATED;
+                    name = "icon_coin";
+                    break;
 
-                if(type==null) continue;
+                case magnet :
+                    //le model a créé un aimant
+                    animated = false;
+                    name = "icon_magnet";
+                    break;
 
-                switch(type) {
-                    case coin:
-                        //le model a créé une piece
-                        animated = Config.COINS_ARE_ANIMATED;
-                        name = "icon_coin";
-                        break;
+                case coinx2 :
+                    //le model a créé une piece+2
+                    animated = Config.COINS_ARE_ANIMATED;
+                    name = "icon_coin_x2";
+                    break;
 
-                    case magnet :
-                        //le model a créé un aimant
-                        animated = false;
-                        name = "icon_magnet";
-                        break;
+                case coinx5 :
+                    //le model a créé une piece+2
+                    animated = Config.COINS_ARE_ANIMATED;
+                    name = "icon_coin_x5";
+                    break;
 
-                    case coinx2 :
-                        //le model a créé une piece+2
-                        animated = Config.COINS_ARE_ANIMATED;
-                        name = "icon_coin_x2";
-                        break;
+                case any : continue;
+                default: continue;
+            }
 
-                    case coinx5 :
-                        //le model a créé une piece+2
-                        animated = Config.COINS_ARE_ANIMATED;
-                        name = "icon_coin_x5";
-                        break;
+            //le nouvel objet est initialisée avec l'image qui lui correspond
+            ImageView newObject = new ImageView(getBaseContext());
+            newObject.setVisibility(View.VISIBLE);
+            initView(newObject,name, animated);
 
-                    case any : continue;
-                    default: continue;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    gv.objectsView.addView(newObject);
                 }
+            });
 
-                //le nouvel objet est initialisée avec l'image qui lui correspond
-                ImageView newObject = new ImageView(getBaseContext());
-                newObject.setVisibility(View.VISIBLE);
-                initView(newObject,name, animated);
-
-                gv.objectsView.addView(newObject);
-                //TODO sendtoback ne fonctionne pas pourquoi???????????
-               // newObject.sendToBack();
+            //TODO sendtoback ne fonctionne pas pourquoi???????????
+            // newObject.sendToBack();
 
 
-                Frame f = modelRoad.addObj(newObject, type, colonne + modelRoad.iMin , 0);
-                modelRoad.initAnimation(f);
-                modelRoad.startAnimation(f);
+            Frame f = modelRoad.addObj(newObject, type, colonne + modelRoad.iMin , 0);
+            ModelRoad.setlayout(newObject, f.size, f.topLeft);
+            startAnimation(f);
+        }
+    }
+
+
+
+    //dictionnaire contenant le Time to live de chaque pouvoir qui a été enclenché
+    Map<TypeOfRoad, Long> TTL = new HashMap<>();
+
+    /**
+     cette fonction créé  un objet
+     vérifie si des pouvoirs sont en cours d'execution et met à jour leur timers respectifs
+     */
+    int nbOfTurn  = 0;
+    Level level = Level.LOW;
+
+    long MALUS_DURATION  = 2l;
+    boolean malus  = false; //indique si le personnage s'est cogné
+
+    long timerJump = 0l;
+    long timerBlink = 0l;
+
+
+
+    public void  updateView() {
+        Log.d(TAG, "updateView:-------------------- Hello from updateView-------------------------");
+        //on véerifie si le personnage a sauté
+        if (wantToJump) {
+            timerJump -= duration;
+            if (timerJump < 0 ){
+                timerJump = 0l;
+                wantToJump = false;
+                gv.animationForRunning();
+            }
+        }
+
+        if(malus) {
+            timerBlink -= duration;
+            if (timerBlink < 0) {
+                timerBlink = 0;
+                malus = false;
             }
         }
 
 
+        Log.d(TAG, "updateView:  Nb elements : " + modelRoad.nbElements);
+        //on vérifie sur quel type de route se trouve le personnage
+        Frame ff = modelRoad.getElemAtIndex(Config.INITIAL_CHAR_POSITION);
+        if(ff==null){
+            Log.d(TAG, "updateView: ff is null");
+        }
+        Type t = modelRoad.getElemAtIndex(Config.INITIAL_CHAR_POSITION).type;
 
-        //dictionnaire contenant le Time to live de chaque pouvoir qui a été enclenché
-        Map<TypeOfRoad, Long> TTL = new HashMap<>();
+        if (t == null){
 
-        /**
-         cette fonction créé  un objet
-         vérifie si des pouvoirs sont en cours d'execution et met à jour leur timers respectifs
-         */
-        int nbOfTurn  = 0;
-        Level level = Level.LOW;
-
-        long MALUS_DURATION  = 2l;
-        boolean malus  = false; //indique si le personnage s'est cogné
-
-        long timerJump = 0l;
-        long timerBlink = 0l;
+        }
 
 
-
-        public void  updateView() {
-            //on véerifie si le personnage a sauté
-            if (wantToJump) {
-                timerJump -= duration;
-                if (timerJump < 0 ){
-                    timerJump = 0l;
-                    wantToJump = false;
-                    gv.animationForRunning();
-                }
-            }
-
-            if(malus) {
-                timerBlink -= duration;
-                if (timerBlink < 0) {
-                    timerBlink = 0;
-                    malus = false;
-                }
-            }
+        Log.d(TAG, "le personnage est sur une route de type " + t.toString());
+        if ((t == TypeOfRoad.TURNLEFT && !wantToTurnLeft) || (t == TypeOfRoad.TURN_RIGHT && !wantToTurnRight)) {
+            //le joueur a perdu
+            // gameOver()
+            return;
+        }
 
 
-            //on vérifie sur quel type de route se trouve le personnage
-            TypeOfRoad t = (TypeOfRoad)modelRoad.getElemAtIndex(Config.INITIAL_CHAR_POSITION).type;
+        if( t == TypeOfRoad.TREE && !wantToJump && malus ){
+            //le personnage s'est cogné deux fois d'affiler
+            //gameOver();
+            return;
+        }
 
-            if ((t == TypeOfRoad.TURNLEFT && !wantToTurnLeft) || (t == TypeOfRoad.TURN_RIGHT && !wantToTurnRight)) {
-                //le joueur a perdu
-               // gameOver()
-                return;
-            }
+        if ((t == TypeOfRoad.TURNLEFT && wantToTurnLeft) || (t == TypeOfRoad.TURN_RIGHT && wantToTurnRight)){
 
+            nbOfTurn += 1;
 
-            if( t == TypeOfRoad.TREE && !wantToJump && malus ){
-                //le personnage s'est cogné deux fois d'affiler
-                //gameOver();
-                return;
-            }
-
-            if ((t == TypeOfRoad.TURNLEFT && wantToTurnLeft) || (t == TypeOfRoad.TURN_RIGHT && wantToTurnRight)){
-
-                nbOfTurn += 1;
-
-                threeDRoadVC.turn(level);
-                wantToTurnLeft = false;
-                wantToTurnRight = false;
-
-                //on invalide le timer et on en rreceer un autre plus rapide
-                thread.interrupt();
-                duration = duration - 10;
-                threeDRoadVC.setDuration(duration);
-
-                thread = new Thread();
-                thread.start();
-
-                return;
-            }
-
-
-            if( t == TypeOfRoad.TREE && !wantToJump) {
-                malus = true;
-                gv.animateBlink();
-                timerBlink = Config.BLINK_DURATION;
-            }
-
-
-
-
-
-            TypeOfRoad lastElemType = (TypeOfRoad)modelRoad.getLastElem().type;
-            if (!threeDRoadVC.stopGeneratingCoins() && (lastElemType == TypeOfRoad.STRAIGHT || lastElemType == TypeOfRoad.BRIDGE)){
-                createObject();
-            }
-
-            modelRoad.movedown();
-
-            threeDRoadVC.createRoad(null, level);
-
-            //vérifie s'il y a des pouvoirs en cours d'execution
-            //met à jour le timer
-          //  handlePower();
-
-
-            //tentative de suppression de l'objet situé devant le personnage
-            //suppression de l'objet située 1 cases devant
-            Frame obj = modelRoad.removeObject(thePosition.x, thePosition.y, any);
-
-            //si aucun n'objet n'est devant le personnage rien à faire
-            if (obj == null){
-                return;
-            }
-
-
-            //les coordonnées du point vers lesquels renvoyer les pieces
-           // Point p;
-                    //callback a executer qd le personnage rencontre un object
-           // var cb : ((Bool) -> ())?
-            if(obj.type == null) {return;}
-
-            switch ((TypeOfObject)obj.type) {
-
-                case coin:
-                    //le personnage attrape une piece
-
-                    hv.addScore(1);
-                   // p = hv.scoreLabel.center
-                   // cb = {(Bool) in  obj.view?.isHidden = true }
-                    break;
-
-                case coinx2:
-                    //le personnage attrape une piece double
-                    hv.addScore(2);
-                  //  p = hv.scoreLabel.center;
-                  //  cb = {(Bool) in  obj.view?.isHidden = true }
-                    break;
-
-                case coinx5:
-                    hv.addScore(5);
-                   // p = hv.scoreLabel.center
-                   // cb = {(Bool) in  obj.view?.isHidden = true }
-                    break;
-                //TODO FACTORISER LE CODE PRECEDENT
-
-
-
-                case magnet:
-                    //le personnage attrape un aimant
-                    //l'icone de l'aimant est déplacée au point de coordonnées p
-                  //  p = hv.powerAnchor;
-
-
-                    //a la fin de l'animation, ajout de l'icone du pouvoir à l'emplacement réservé dans HumanInterface
-//                    cb = {(Bool) in
-//                            //declenchement du timer pendant 10s
-//                            self.TTL.append((magnet, TTL_POWER))
-                    //self.hv.addPower(powerView: obj.view!, duration: TTL_POWER)
-                    //print("add the power now")
-                //}
-
-                    break;
-
-
-                default:
-                    break;
-            }
-
-            //deplacement de l'objet si les coordonnées p sont non nuls
-            //moveObjToPoint(obj.view!, point: p, withDuration: 1, options: .transitionCurlUp, cb : cb)
-
+            threeDRoadVC.turn(level);
             wantToTurnLeft = false;
             wantToTurnRight = false;
 
+            //on invalide le timer et on en rreceer un autre plus rapide
+            timer.cancel();
+            duration = duration - 10;
+            threeDRoadVC.setDuration(duration);
+
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    updateView();
+                }
+            }, 0, duration);
+
+            return;
         }
+
+
+        if( t == TypeOfRoad.TREE && !wantToJump) {
+            malus = true;
+            gv.animateBlink();
+            timerBlink = Config.BLINK_DURATION;
+        }
+
+
+        TypeOfRoad lastElemType = (TypeOfRoad)modelRoad.getLastElem().type;
+        Log.d(TAG, "updateView: le dernier element est " +lastElemType.toString());
+        if (!threeDRoadVC.stopGeneratingCoins() && (lastElemType == TypeOfRoad.STRAIGHT || lastElemType == TypeOfRoad.BRIDGE)){
+            createObject();
+        }
+
+        modelRoad.movedown();
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                threeDRoadVC.createRoad(null, level);
+            }
+        });
+
+
+        //vérifie s'il y a des pouvoirs en cours d'execution
+        //met à jour le timer
+        //  handlePower();
+
+
+        //tentative de suppression de l'objet situé devant le personnage
+        //suppression de l'objet située 1 cases devant
+        Frame obj = modelRoad.removeObject(thePosition[0], thePosition[1], any);
+
+        //si aucun n'objet n'est devant le personnage rien à faire
+        if (obj == null){
+            return;
+        }
+
+
+        //les coordonnées du point vers lesquels renvoyer les pieces
+        // Point p;
+        //callback a executer qd le personnage rencontre un object
+        // var cb : ((Bool) -> ())?
+        if(obj.type == null) {return;}
+
+        switch ((TypeOfObject)obj.type) {
+            case coin:
+                //le personnage attrape une piece
+
+                hv.addScore(1);
+                // p = hv.scoreLabel.center
+                // cb = {(Bool) in  obj.view?.isHidden = true }
+                break;
+
+            case coinx2:
+                //le personnage attrape une piece double
+                hv.addScore(2);
+                //  p = hv.scoreLabel.center;
+                //  cb = {(Bool) in  obj.view?.isHidden = true }
+                break;
+
+            case coinx5:
+                hv.addScore(5);
+                // p = hv.scoreLabel.center
+                // cb = {(Bool) in  obj.view?.isHidden = true }
+                break;
+            //TODO FACTORISER LE CODE PRECEDENT
+
+            case magnet:
+                //le personnage attrape un aimant
+                //l'icone de l'aimant est déplacée au point de coordonnées p
+                //  p = hv.powerAnchor;
+
+
+                //a la fin de l'animation, ajout de l'icone du pouvoir à l'emplacement réservé dans HumanInterface
+//                    cb = {(Bool) in
+//                            //declenchement du timer pendant 10s
+//                            self.TTL.append((magnet, TTL_POWER))
+                //self.hv.addPower(powerView: obj.view!, duration: TTL_POWER)
+                //print("add the power now")
+                //}
+
+                break;
+
+
+            default:
+                break;
+        }
+
+        //deplacement de l'objet si les coordonnées p sont non nuls
+        //moveObjToPoint(obj.view!, point: p, withDuration: 1, options: .transitionCurlUp, cb : cb)
+
+        wantToTurnLeft = false;
+        wantToTurnRight = false;
+    }
 
 
 
@@ -550,27 +530,26 @@ public class GameViewController extends Activity implements  Runnable{
 
 
 
+    boolean wantToTurnLeft  = false;
+    boolean wantToTurnRight  = false;
+    boolean wantToJump = false;
 
 
+    public void jump() {
+        if (!wantToJump) {
+            timerJump = Config.JUMP_DURATION;
+            wantToJump = true;
 
-        boolean wantToTurnLeft  = false;
-        boolean wantToTurnRight  = false;
-        boolean wantToJump = false;
-
-
-        public void jump() {
-            if (!wantToJump) {
-                timerJump = Config.JUMP_DURATION;
-                wantToJump = true;
-
-                gv.animationForJump();
-            }
+            gv.animationForJump();
         }
+    }
 
 
 
 
-
+    public void startAnimation(Frame elem){
+        elem.view.startAnimation(elem.transformation);
+    }
 }
 
 

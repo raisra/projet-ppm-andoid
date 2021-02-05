@@ -18,11 +18,10 @@ public class WelcomViewController extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.welcome_view);
-
     }
 
 
-    public void startGame(View view){
+    public void startTheGame(View view){
         Intent intent = new Intent(view.getContext(), GameViewController.class);
         startActivity(intent);
         finish();

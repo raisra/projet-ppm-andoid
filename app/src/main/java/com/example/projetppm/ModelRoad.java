@@ -189,14 +189,22 @@ public class ModelRoad {
 
 
     @SuppressLint("NewApi")
-    protected static void setlayout(View v, Size size, Point topLeft) {
+    public static void setlayout(View v, Size size, Point topLeft) {
         v.layout(topLeft.x, topLeft.y , topLeft.x + size.getWidth() , topLeft.y + size.getHeight());
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public Point getCenter(int i, int j) {
+        Frame f = getObj(i,j);
+        float x = linearX(i, j) ;
+        float y = heightOfScreen - F(j) ;
+
+        return  new Point((int)x,(int)y);
+    }
+
     public Frame addObj(ImageView img, Type type, int i, int j) {
         Frame obj = getObj(i, j);
-        setlayout(img, obj.size, obj.topLeft);
 
         obj.setView(img);
         obj.setType(type);

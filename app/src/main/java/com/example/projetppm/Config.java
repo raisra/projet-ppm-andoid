@@ -43,8 +43,8 @@ public class Config {
         NAMES.put(TypeOfRoad.EMPTY, "road_pave");
         NAMES.put(TypeOfRoad.PASSAGE, "road_pave");
         NAMES.put(TypeOfRoad.TREE, "road_tree");
-        NAMES.put(TypeOfRoad.TURN_RIGHT,"road_turnRight");
-        NAMES.put(TypeOfRoad.TURNLEFT , "road_turnLeft");
+        NAMES.put(TypeOfRoad.TURN_RIGHT,"road_turn_right");
+        NAMES.put(TypeOfRoad.TURNLEFT , "road_turn_left");
     }
 
 }

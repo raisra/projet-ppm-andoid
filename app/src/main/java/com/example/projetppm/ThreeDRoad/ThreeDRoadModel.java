@@ -240,18 +240,13 @@ public class ThreeDRoadModel extends ModelRoad {
             return null;
         }
 
-
         Frame obj = super.addObj(im, type, 0, nRows - nbElements);
-        startAnimation(obj);
         nbElements += 1;
-
         return obj;
     }
 
 
-    public void startAnimation(Frame elem){
-       elem.view.startAnimation(elem.transformation);
-    }
+
 
 
 
@@ -399,6 +394,7 @@ public class ThreeDRoadModel extends ModelRoad {
 
         elem.transformation = set;
     }
+
 
 
 

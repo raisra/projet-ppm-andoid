@@ -17,16 +17,16 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/above_the_sky" />
 
-    <Button
+    <ImageButton
         android:id="@+id/play_button"
         android:layout_width="88dp"
         android:layout_height="44dp"
-        android:background="@drawable/icon_play_button"
-        android:onClick="startGame"
-        android:text="Button"
+        app:srcCompat="@drawable/icon_play_button"
+        android:onClick="startTheGame"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:scaleType="fitXY"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
