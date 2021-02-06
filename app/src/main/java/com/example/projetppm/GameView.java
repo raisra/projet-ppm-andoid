@@ -7,6 +7,7 @@ package com.example.projetppm;//
 
 
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Point;
@@ -65,7 +66,6 @@ public class GameView extends RelativeLayout implements Game{
         this.speed = s;
         character = (ImageView) findViewById(R.id.character_view_id);
         objectsView = (RelativeLayout) findViewById(R.id.objects_view);
-        
 
         initPersonnage(centerOfChar, sizeOfChar);
 
@@ -79,7 +79,7 @@ public class GameView extends RelativeLayout implements Game{
      */
     private void initPersonnage(Point center , Size size)  {
         Point topLeft = new Point(center.x - size.getWidth()/2, center.y - size.getHeight()/2);
-        ModelRoad.setlayout(character,size,topLeft);
+        Frame.setLayout(character,size,topLeft);
         character.setVisibility(INVISIBLE);
 
         jumpAnimation = (AnimationDrawable)getResources().getDrawable( R.drawable.animation_char_jump );
@@ -166,6 +166,12 @@ public class GameView extends RelativeLayout implements Game{
         objectsView.setVisibility(INVISIBLE);
         runAnimation.stop();
     }
+
+
+
+
+
+
 
 }
 

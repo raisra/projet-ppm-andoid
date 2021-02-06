@@ -21,6 +21,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 
 import com.example.projetppm.Frame;
+import com.example.projetppm.GameView;
+import com.example.projetppm.GameViewController;
 import com.example.projetppm.ModelRoad;
 import com.example.projetppm.R;
 import com.example.projetppm.Type;
@@ -34,7 +36,7 @@ public class ThreeDRoadViewController  {
 
     public RelativeLayout roadView;
     public Context ctx;
-    public   Map<TypeOfRoad, String> names;
+    public  Map<TypeOfRoad, String> names;
 
     public String TAG = "THReeDRoadViewController";
 
@@ -92,11 +94,8 @@ public class ThreeDRoadViewController  {
         return names.get(accordingTo);
     }
 
-    private Bitmap getBitMap(String name){
-        int imgId = ctx.getResources().getIdentifier(name, "drawable", ctx.getPackageName());
-        Bitmap image = BitmapFactory.decodeResource(ctx.getResources(), imgId);
-        return  image;
-    }
+
+
 
     public void getImages(Type ofType){
         String name = getName(ofType);
@@ -116,15 +115,22 @@ public class ThreeDRoadViewController  {
             int i = 1;
 
             image = getBitMap(name + "_" + String.valueOf(i));
-            while( image != null){
+            while(image != null){
                 ImageView img = new ImageView(ctx);
                 img.setImageDrawable(new BitmapDrawable(ctx.getResources(), image));
                 buffer.add(new Pair<>(img, ofType));
                 i++;
+                image = getBitMap(name + "_" + String.valueOf(i));
             }
         }
     }
 
+    protected Bitmap getBitMap(String name){
+        int imgId = ctx.getResources().getIdentifier(name, "drawable", ctx.getPackageName());
+        if(imgId == 0) return  null;
+        Bitmap image = BitmapFactory.decodeResource(ctx.getResources(), imgId);
+        return  image;
+    }
 
     /*
      genere 4 vue de type straight
@@ -182,11 +188,9 @@ public class ThreeDRoadViewController  {
             ImageView img = pair.first;
             img.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
-            ModelRoad.setlayout(img, frame.size, frame.topLeft);
-
+            Frame.setLayout(frame);
             roadView.addView(img);
-
-            startAnimation(frame);
+            Frame.startAnimation(frame);
             buffer.remove(0);
 
             Log.d(TAG, "createRoad: append the road of type " + pair.second.toString());
@@ -211,11 +215,6 @@ public class ThreeDRoadViewController  {
         }
     }
 
-
-
-    public void startAnimation(Frame elem){
-        elem.view.startAnimation(elem.transformation);
-    }
 
 
 }

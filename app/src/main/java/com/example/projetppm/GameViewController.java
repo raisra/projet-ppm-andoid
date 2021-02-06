@@ -2,8 +2,6 @@ package com.example.projetppm;
 
 
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -13,22 +11,18 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.fragment.app.FragmentActivity;
 
 import com.example.projetppm.ThreeDRoad.*;
 
 
-import java.sql.Time;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import static com.example.projetppm.TypeOfObject.*;
 
@@ -106,7 +100,21 @@ public class GameViewController extends Activity {
     }
 
     public void  startTheGame(View view){
-        hv.animationForNumber();
+        Thread thread = new Thread(){
+            public void run(){
+                System.out.println("Thread Running");
+                hv.animationForNumber();
+            }
+        };
+
+
+        try {
+            Thread.sleep(1000);
+            thread.interrupt();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         //sleep(4000);
         Log.d(TAG, "run: end of animation number");
 
@@ -116,17 +124,20 @@ public class GameViewController extends Activity {
         gameIsStoped = false;
 
         timer = new Timer();
+        Log.d(TAG, "the duration is en mills" + duration);
         timer.scheduleAtFixedRate(new java.util.TimerTask() {
             @Override
             public void run() {
-                updateView();
-                gv.invalidate();
-                hv.invalidate();
-                if (gv.character.getVisibility() == View.INVISIBLE){
-                    Log.d(TAG, "run: the character shouldn't be invisible");
-                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateView();
+                    };
+                });
+
+
             }
-        }, 0, 1000);
+        }, 0, duration);
     }
 
 
@@ -179,6 +190,7 @@ public class GameViewController extends Activity {
      */
     public boolean initView(ImageView view , String name, boolean animated) {
 
+        Log.d("INIT OBJECT", "initView: init view of file" + name + ". animated?: " + animated);
         if (!animated) {
             Bitmap img = getBitMap(name);
             if (img != null) {
@@ -200,8 +212,9 @@ public class GameViewController extends Activity {
     }
 
 
-    private Bitmap getBitMap(String name){
+    protected Bitmap getBitMap(String name){
         int imgId = getResources().getIdentifier(name, "drawable", getPackageName());
+        if(imgId == 0) return  null;
         Bitmap image = BitmapFactory.decodeResource(getResources(), imgId);
         return  image;
     }
@@ -256,21 +269,18 @@ public class GameViewController extends Activity {
             //le nouvel objet est initialisée avec l'image qui lui correspond
             ImageView newObject = new ImageView(getBaseContext());
             newObject.setVisibility(View.VISIBLE);
-            initView(newObject,name, animated);
-
-
+            if (!initView(newObject,name, animated)) {
+                Log.d("ERROR", "---------------------FAILED TO INIT object " + type + "of file " + name);
+                return;
+            }
 
             //TODO sendtoback ne fonctionne pas pourquoi???????????
             // newObject.sendToBack();
-
-
-
-
             Frame f = modelRoad.addObj(newObject, type, colonne + modelRoad.iMin , 0);
-            ModelRoad.setlayout(newObject, f.size, f.topLeft);
+            Frame.setLayout(f);
             gv.objectsView.addView(newObject);
-            startAnimation(f);
-            Log.d(TAG, "&&&&&&&&&&&&&&&&&&&&&&&run: Hello from run " + this);
+            Frame.startAnimation(f);
+
 
         }
     }
@@ -317,35 +327,26 @@ public class GameViewController extends Activity {
         }
 
 
-        Log.d(TAG, "updateView:  Nb elements : " + modelRoad.nbElements);
-        //on vérifie sur quel type de route se trouve le personnage
-        Frame ff = modelRoad.getElemAtIndex(Config.INITIAL_CHAR_POSITION);
-        if(ff==null){
-            Log.d(TAG, "updateView: ff is null");
-        }
+
         Type t = modelRoad.getElemAtIndex(Config.INITIAL_CHAR_POSITION).type;
+        Log.d("TYPE OF ROAD", "VOUS vs etes sur une route de type " + t + " et votre index est " + Config.INITIAL_CHAR_POSITION);
+        Log.d(TAG, "updateView: le dernier element est " +(TypeOfRoad)modelRoad.getLastElem().type + " " + modelRoad.getLastElem().index );
 
-        if (t == null){
-
-        }
-
-
-        Log.d(TAG, "le personnage est sur une route de type " + t.toString());
         if ((t == TypeOfRoad.TURNLEFT && !wantToTurnLeft) || (t == TypeOfRoad.TURN_RIGHT && !wantToTurnRight)) {
-            //le joueur a perdu
-            // gameOver()
+            Log.d("********GAME OVER******", "VOUS N'AVEZ PAS tourner");
+            timer.cancel();
             return;
         }
 
 
         if( t == TypeOfRoad.TREE && !wantToJump && malus ){
-            //le personnage s'est cogné deux fois d'affiler
-            //gameOver();
+            Log.d("****GAME OVER******", "VOUS vs etes cogné");
+            timer.cancel();
             return;
         }
 
         if ((t == TypeOfRoad.TURNLEFT && wantToTurnLeft) || (t == TypeOfRoad.TURN_RIGHT && wantToTurnRight)){
-
+            Log.d("**VOUS ALLEZ TOURNER*", "");
             nbOfTurn += 1;
 
             threeDRoadVC.turn(level);
@@ -357,13 +358,6 @@ public class GameViewController extends Activity {
             duration = duration - 10;
             threeDRoadVC.setDuration(duration);
 
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    updateView();
-                }
-            }, 0, duration);
-
             return;
         }
 
@@ -374,27 +368,13 @@ public class GameViewController extends Activity {
             timerBlink = Config.BLINK_DURATION;
         }
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+            TypeOfRoad lastElemType = (TypeOfRoad)modelRoad.getLastElem().type;
+                if (!threeDRoadVC.stopGeneratingCoins() && (lastElemType == TypeOfRoad.STRAIGHT || lastElemType == TypeOfRoad.BRIDGE)){
+                    createObject();
+                }
+                modelRoad.moveDown();
+                threeDRoadVC.createRoad(null, level);
 
-
-
-
-        TypeOfRoad lastElemType = (TypeOfRoad)modelRoad.getLastElem().type;
-        Log.d(TAG, "updateView: le dernier element est " +lastElemType.toString());
-        if (!threeDRoadVC.stopGeneratingCoins() && (lastElemType == TypeOfRoad.STRAIGHT || lastElemType == TypeOfRoad.BRIDGE)){
-            createObject();
-        }
-
-        modelRoad.movedown();
-
-
-
-        threeDRoadVC.createRoad(null, level);
-
-            };
-        });
 
         //vérifie s'il y a des pouvoirs en cours d'execution
         //met à jour le timer
@@ -558,13 +538,6 @@ public class GameViewController extends Activity {
 
 
 
-    public static void startAnimation(Frame elem){
-        if(elem.view==null){
-            Log.d("START ANIMATION", "SHOULD NOT BE HERE startAnimation: " + elem);
-            return;
-        }
-        elem.view.startAnimation(elem.transformation);
-    }
 
 
 }

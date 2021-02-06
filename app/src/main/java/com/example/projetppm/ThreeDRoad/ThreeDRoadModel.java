@@ -4,6 +4,7 @@ import android.animation.AnimatorSet;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
+import android.util.Log;
 import android.util.Size;
 import android.view.View;
 import android.view.animation.AnimationSet;
@@ -14,6 +15,7 @@ import android.widget.ImageView;
 import androidx.annotation.RequiresApi;
 
 import com.example.projetppm.Frame;
+import com.example.projetppm.GameView;
 import com.example.projetppm.GameViewController;
 import com.example.projetppm.ModelRoad;
 import com.example.projetppm.Param;
@@ -79,7 +81,11 @@ public class ThreeDRoadModel extends ModelRoad {
             f.index = nRows - k;
             f.index_j = -1;
             initAnimation(f);
+
+
+            Log.d("INIT ROAD" ,"initRoad: elem: " + f.index + " pos:" + f.topLeft + " size: " + f.size );
         }
+        Log.d("HEIGHT of screen", "ThreeDRoadModel: heightofscreen " + p.heightOfScreen + " " + heightOfScreen);
 
     }
 
@@ -263,15 +269,16 @@ public class ThreeDRoadModel extends ModelRoad {
     completion : la methode à effectuer en cas de sortie d'une piece de l'ecran
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public void movedown(){
+    public void moveDown(){
 
         //suppression de la derniere ligne
 
         for(int i =0 ; i<nColumns ; i++){
             Frame obj = getObj(i, nRows);
-            TypeOfRoad t = (TypeOfRoad) obj.getType();
+            Type t =  obj.getType();
             if (t != null ){
                 obj.view.setVisibility(View.INVISIBLE);
+                obj.view = null;
             }
         }
 
@@ -279,21 +286,23 @@ public class ThreeDRoadModel extends ModelRoad {
         //print("decalage vers le bas")
         //decalage des cases vers le bas
         for(int i =0 ; i<nColumns ; i++) {
-            int j = nRows-1;
+            int j = nRows;
 
             while(j>0)
             {
-                Frame obj = getObj(i, j+1);
-                Frame prevObj = getObj(i, j);
+                Frame obj = getObj(i, j);
+                Frame prevObj = getObj(i, j-1);
 
                 obj.view = prevObj.view;
                 obj.type = prevObj.type;
 
                 if(obj.view!= null) {
-                    setlayout(obj.view, obj.size, obj.topLeft);
+                    Frame.setLayout(obj);
+                    obj.view.invalidate();
+                    obj.view.clearAnimation();
+                    Frame.startAnimation(obj);
                 }
 
-                GameViewController.startAnimation(obj);
                 j -= 1;
             }
         }
@@ -311,7 +320,6 @@ public class ThreeDRoadModel extends ModelRoad {
 
         nbElements -= 1;
         if (nbElements < 0){
-
             nbElements = 0;
         }
     }
@@ -381,18 +389,25 @@ public class ThreeDRoadModel extends ModelRoad {
 
     public void initAnimation(Frame elem){
 
-        TranslateAnimation translate = new TranslateAnimation(elem.topLeft.x, elem.topLeft.x+elem.xTranslate,
-                elem.topLeft.y, elem.topLeft.y+elem.yTranslate);
+        if( elem.index_j == -1 ){
+            Log.d("INIANIM" ,"initAnimation: elem: " + elem.index + " trans x:" + elem.xTranslate + " trans y: " + elem.yTranslate + " scale: " + elem.scaleW + "," + elem.scaleH );
+        }
 
 
-        ScaleAnimation scale = new ScaleAnimation(1, elem.scaleW, 1,elem.scaleH);
+        TranslateAnimation translate = new TranslateAnimation(0, elem.xTranslate,
+                0, elem.yTranslate);
+
 
         translate.setDuration(duration);
+        ScaleAnimation scale = new ScaleAnimation(1, elem.scaleW, 1,elem.scaleH);
         scale.setDuration(duration);
 
-        AnimationSet set = new AnimationSet(false);
+
+        AnimationSet set = new AnimationSet(true);
         set.addAnimation(translate);
         set.addAnimation(scale);
+        set.setDuration(duration);
+        set.setFillAfter(true);
 
         elem.transformation = set;
     }

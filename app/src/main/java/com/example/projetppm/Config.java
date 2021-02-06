@@ -20,7 +20,7 @@ public class Config {
     public static int  NB_ROWS  = 10;
     public static int  NB_COLUMNS  = 5;
 
-    public static long  DURATION = 300;
+    public static long  DURATION = 1000;
     //the size of the uiview representing the character;
     public static Size sizeChar  = new Size(600, 1350);
 

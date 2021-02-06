@@ -56,7 +56,6 @@ public class HumanInterfaceView extends ConstraintLayout implements  Game {
         messageButton = findViewById(R.id.message_button_id);
         counterView = findViewById(R.id.counter_view_id);
 
-        counterView.setBackgroundResource(R.drawable.animation_start_count);
 
 
 
@@ -115,9 +114,10 @@ public class HumanInterfaceView extends ConstraintLayout implements  Game {
 
 
     public void animationForNumber() {
-        AnimationDrawable anim = ((AnimationDrawable)counterView.getBackground());
-        anim.start();
-       // Animation animation = AnimationUtils.loadAnimation(getContext(),R.drawable.start_count_animation);
+        AnimationDrawable counterAnimation = (AnimationDrawable)getResources().getDrawable( R.drawable.animation_start_count );
+        counterAnimation.setOneShot(true);
+        counterView.setBackground(counterAnimation);
+        counterAnimation.start();
     }
 
 

@@ -157,7 +157,7 @@ public class ModelRoad {
      * completion : la methode à effectuer en cas de sortie d'une piece de l'ecran
      */
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public void movedown() {
+    public void moveDown() {
         //suppression de la derniere ligne
         for (int i = iMin; i <= iMax; i++) {
             Frame obj = getObj(i, nRows);
@@ -175,7 +175,8 @@ public class ModelRoad {
                 obj.type = prevObj.type;
 
                 View view = obj.view;
-                setlayout(view, obj.size, obj.topLeft);
+                Frame.setLayout(obj);
+                obj.view.postInvalidate();
 
                 j -= 1;
             }
@@ -190,16 +191,7 @@ public class ModelRoad {
     }
 
 
-    @SuppressLint("NewApi")
-    public static void setlayout(View v, Size size, Point topLeft) {
-        RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(size.getWidth(), size.getHeight());
-        layoutParams.setMargins(topLeft.x, topLeft.y,0, 0);
 
-        v.setLayoutParams(layoutParams);
-        // v.layout(topLeft.x, topLeft.y , topLeft.x + size.getWidth() , topLeft.y + size.getHeight());
-
-        Log.d("SETLAYOUT", "setlayout: " + topLeft.x + " " + topLeft.y + " " + " " + size.getWidth() +  " " + size.getHeight());
-    }
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

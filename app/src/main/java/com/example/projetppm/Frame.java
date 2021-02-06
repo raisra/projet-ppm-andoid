@@ -1,17 +1,20 @@
 package com.example.projetppm;
 
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.util.Log;
 import android.util.Size;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 
@@ -53,4 +56,43 @@ public class Frame  {
     }
 
     public void setType(Type t){ this.type = t; }
+
+
+    @SuppressLint("NewApi")
+    public static void setLayout(Frame f) {
+        RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(f.size.getWidth(), f.size.getHeight());
+        layoutParams.setMargins(f.topLeft.x, f.topLeft.y,0, 0);
+
+        f.view.setLayoutParams(layoutParams);
+        // v.layout(topLeft.x, topLeft.y , topLeft.x + size.getWidth() , topLeft.y + size.getHeight());
+
+        Log.d("SETLAYOUT", "setlayout elem: (" +f.type + "," + f.index+")" + f.topLeft.x + " " + f.topLeft.y + " " + " " + f.size.getWidth() +  " " + f.size.getHeight());
+    }
+
+
+    @SuppressLint("NewApi")
+    public static void setLayout(View v, Size size, Point topLeft) {
+        RelativeLayout.LayoutParams layoutParams=new RelativeLayout.LayoutParams(size.getWidth(), size.getHeight());
+        layoutParams.setMargins(topLeft.x, topLeft.y,0, 0);
+
+        v.setLayoutParams(layoutParams);
+        // v.layout(topLeft.x, topLeft.y , topLeft.x + size.getWidth() , topLeft.y + size.getHeight());
+
+        Log.d("SETLAYOUT", "setlayout: " + topLeft.x + " " + topLeft.y + " " + " " + size.getWidth() +  " " + size.getHeight());
+    }
+
+
+
+
+
+    public static void startAnimation(Frame elem){
+        if(elem.view==null){
+            return;
+        }
+         elem.view.startAnimation(elem.transformation);
+    }
+
+
+
+
 }
