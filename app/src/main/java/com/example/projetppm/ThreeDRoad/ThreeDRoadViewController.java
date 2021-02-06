@@ -84,7 +84,6 @@ public class ThreeDRoadViewController  {
         this.duration = duration;
     }
 
-
     public void updateDuration(long d){
         duration = d;
     }

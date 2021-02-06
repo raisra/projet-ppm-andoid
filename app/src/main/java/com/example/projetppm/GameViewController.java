@@ -80,7 +80,7 @@ public class GameViewController extends Activity {
         Point p = new Point();
         getWindowManager().getDefaultDisplay().getSize(p);
 
-        sizeIm = new Size(p.x, (int) (sizeIm.getWidth() * r));
+        sizeIm = new Size(p.x, (int) (p.x * r));
         float D = (float) (sizeIm.getWidth() * Math.pow(factor, Config.NB_ROWS));
         Param param = new Param(Config.NB_ROWS, Config.NB_COLUMNS, p.x, D, 5, 50, sizeIm, factor, p.y);
 
@@ -374,26 +374,25 @@ public class GameViewController extends Activity {
             timerBlink = Config.BLINK_DURATION;
         }
 
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+
+
 
         TypeOfRoad lastElemType = (TypeOfRoad)modelRoad.getLastElem().type;
         Log.d(TAG, "updateView: le dernier element est " +lastElemType.toString());
         if (!threeDRoadVC.stopGeneratingCoins() && (lastElemType == TypeOfRoad.STRAIGHT || lastElemType == TypeOfRoad.BRIDGE)){
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    createObject();
-                };
-            });
-
+            createObject();
         }
 
         modelRoad.movedown();
 
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                threeDRoadVC.createRoad(null, level);
+
+        threeDRoadVC.createRoad(null, level);
+
             };
         });
 
@@ -559,9 +558,10 @@ public class GameViewController extends Activity {
 
 
 
-    public void startAnimation(Frame elem){
+    public static void startAnimation(Frame elem){
         if(elem.view==null){
-            Log.d(TAG, "SHOULD NOT BE HERE startAnimation: " + elem);
+            Log.d("START ANIMATION", "SHOULD NOT BE HERE startAnimation: " + elem);
+            return;
         }
         elem.view.startAnimation(elem.transformation);
     }

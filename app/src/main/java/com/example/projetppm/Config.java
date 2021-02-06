@@ -22,7 +22,7 @@ public class Config {
 
     public static long  DURATION = 300;
     //the size of the uiview representing the character;
-    public static Size sizeChar  = new Size(300, 675);
+    public static Size sizeChar  = new Size(600, 1350);
 
     public static long JUMP_DURATION = 1000;
     public static long BLINK_DURATION  = 5000;

@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import androidx.annotation.RequiresApi;
 
 import com.example.projetppm.Frame;
+import com.example.projetppm.GameViewController;
 import com.example.projetppm.ModelRoad;
 import com.example.projetppm.Param;
 import com.example.projetppm.Type;
@@ -292,6 +293,7 @@ public class ThreeDRoadModel extends ModelRoad {
                     setlayout(obj.view, obj.size, obj.topLeft);
                 }
 
+                GameViewController.startAnimation(obj);
                 j -= 1;
             }
         }
