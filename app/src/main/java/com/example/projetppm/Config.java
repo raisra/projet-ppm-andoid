@@ -17,10 +17,10 @@ public class Config {
     public static boolean  COINS_ARE_ANIMATED = false;
     public static int  INITIAL_CHAR_POSITION  = 1;
 
-    public static int  NB_ROWS  = 10;
+    public static int  NB_ROWS  = 2;
     public static int  NB_COLUMNS  = 5;
 
-    public static long  DURATION = 1000;
+    public static long  DURATION = 5000;
     //the size of the uiview representing the character;
     public static Size sizeChar  = new Size(600, 1350);
 
@@ -39,5 +39,10 @@ public class Config {
         NAMES.put(TypeOfRoad.TURN_RIGHT,"road_turn_right");
         NAMES.put(TypeOfRoad.TURNLEFT , "road_turn_left");
     }
+
+
+    public static Size SIZEIM = new Size(400, 99);
+    public static float ALPHA = (float) 75.96;
+    public static float FACTOR  = (float) ( 296.0/400.0);
 
 }

@@ -8,6 +8,7 @@ import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.util.Size;
 import android.view.View;
@@ -28,17 +29,18 @@ import static com.example.projetppm.TypeOfObject.*;
 
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class GameViewController extends Activity {
+public class GameViewController extends Activity{
 
     public  String TAG = "GAMEVIEWCONTROLLER";
 
-    public Size sizeIm = new Size(400, 100);
-    public static float alpha = (float) 75.96;
-    public static float factor  = (float) ( 309.96/398.52);
+    public Size sizeIm ;
+    public static float alpha ;
+    public static float factor ;
 
     public boolean SoundOnOff = true;
 
-    public Timer timer ;
+    public static Handler handler ;
+    public Runnable runnable ;
     public long duration ;
 
     public GameView gv ;
@@ -61,11 +63,15 @@ public class GameViewController extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(TAG, "view on create");
+       // Log.d(TAG, "view on create");
         setContentView(R.layout.game_view);
 
         gv = (GameView) findViewById(R.id.game_view_id);
         hv = (HumanInterfaceView) findViewById(R.id.human_interface_view_id);
+
+        sizeIm = Config.SIZEIM;
+        alpha = Config.ALPHA;
+        factor = Config.FACTOR;
 
         duration = Config.DURATION;
         //init du model 3D
@@ -73,15 +79,15 @@ public class GameViewController extends Activity {
         float r = (float)sizeIm.getHeight()/(float)sizeIm.getWidth();
         Point p = new Point();
         getWindowManager().getDefaultDisplay().getSize(p);
-
         sizeIm = new Size(p.x, (int) (p.x * r));
+
         float D = (float) (sizeIm.getWidth() * Math.pow(factor, Config.NB_ROWS));
         Param param = new Param(Config.NB_ROWS, Config.NB_COLUMNS, p.x, D, 5, 50, sizeIm, factor, p.y);
 
         modelRoad = new ThreeDRoadModel(param, duration);
 
         //initialise la position du persinnage au mileu de l'ecran
-        thePosition = new int[]{(modelRoad.iMax + modelRoad.iMin) / 2, Config.NB_ROWS - Config.INITIAL_CHAR_POSITION};
+        thePosition = new int[]{(Config.NB_COLUMNS) / 2, Config.NB_ROWS - Config.INITIAL_CHAR_POSITION};
 
         Point posOfChar = modelRoad.getCenter(thePosition[0], thePosition[1] );
 
@@ -97,6 +103,12 @@ public class GameViewController extends Activity {
     protected void onStart() {
         super.onStart();
         startTheGame(null);
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        handler.removeCallbacks(runnable);
     }
 
     public void  startTheGame(View view){
@@ -116,31 +128,31 @@ public class GameViewController extends Activity {
         }
 
         //sleep(4000);
-        Log.d(TAG, "run: end of animation number");
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+      //  Log.d(TAG, "run: end of animation number");
 
         threeDRoadVC.startTheGame();
         gv.startTheGame();
         hv.startTheGame();
         gameIsStoped = false;
 
-        timer = new Timer();
-        Log.d(TAG, "the duration is en mills" + duration);
-        timer.scheduleAtFixedRate(new java.util.TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateView();
-                    };
-                });
+        handler = new Handler();
+        runnable = () -> {
+            Log.d("TASKKKKKKK", "run: " + duration);
+            updateView();
+           // gv.objectsView.postInvalidate();
+           // gv.objectsView.requestLayout();
+           // threeDRoadVC.roadView.requestLayout();
+            handler.postDelayed(runnable, duration);
+        };
+        Log.d("\t\t\tHANDLER", "the handler is goint to start");
+        handler.postDelayed(runnable, duration);
 
-
-            }
-        }, 0, duration);
     }
-
-
 
 
 
@@ -153,7 +165,7 @@ public class GameViewController extends Activity {
         //TODO SAUVEGARDER LE niveau et la valeur du timer pr elancer le timer a la meme frequence
         if(!gameIsStoped){
             gameIsStoped = true;
-            timer.cancel();
+            handler.removeCallbacks(runnable);
             gv.stopTheGame();
             hv.stopTheGame();
         }
@@ -170,9 +182,15 @@ public class GameViewController extends Activity {
         //   Intent intent = new Intent(getBaseContext(), Message);
     }
 
+    @Override
+    protected void onStop() {
+        Log.d("ON STOP", "onStop: ");
+        super.onStop();
+    }
 
     @Override
     protected void onPause() {
+        Log.d("PAUSE ACTIVITY", "onPause: ");
         super.onPause();
         try {
             stopTheGame(findViewById(android.R.id.content).getRootView());
@@ -180,6 +198,107 @@ public class GameViewController extends Activity {
             e.printStackTrace();
         }
     }
+
+
+
+
+
+    //        func handlePower(){
+    //
+    //            //si un aucun poucoir n'est en cours d'execution on ne fait rien
+    //            if(TTL.isEmpty) {return}
+    //
+    //            var i = 0
+    //            while i<TTL.count  {
+    //                let (power, ttl) = TTL.first!
+    //                //si le pouvoir a fini de s'executer
+    //                if ttl <= 0 {
+    //                    print("le pouvoir \(power) est terminé")
+    //                    //un pouvoir est enclenché
+    //                    TTL.remove(at: 0)
+    //
+    //                    continue
+    //                }
+    //
+    //                let timeToLive = ttl - duration!
+    //                        TTL[0].1 = timeToLive
+    //                aa += 1
+    //
+    //                switch power {
+    //
+    //                    case magnet:
+    //                        //attirer les pieces situé dans le voisinage
+    //                        //on commence par retirer les pieces concernées du chemin
+    //
+    //
+    //                        for i in 0..<modelRoad.nColumns {
+    //                        for neighborhood in 1 ... DISTANCE_OF_MAGNET {
+    //                            //on tente de retirer les pieces situées dans le voisinage du personnage
+    //                            let coin = modelRoad.removeObject(i: i, j: thePosition.1 - neighborhood, type: coin).view
+    //
+    //                            //si on trouve une piece
+    //                            if coin != nil {
+    //                                //on deplace la piece vers le personnage
+    //                                moveObjToPoint(coin!,
+    //                                        point: gv.character.center,
+    //                                        withDuration: 1,
+    //                                        options: .curveEaseIn,
+    //                                        cb : {_ in
+    //                                    coin!.isHidden = true
+    //                                    self.coins.insert(coin!)
+    //                                }
+    //                            )
+    //
+    //                                //TODO faire un mouvement plus naturel
+    //                                //Peut etre animation suivant une courbe de bezier
+    //                            }
+    //                        }
+    //                    }
+    //                    break
+    //
+    //                    case transparency:
+    //                        //le personnage devient mi-transparent
+    //                        //il devient capable de traverser les obstacles
+    //                        gv.character.alpha = 0.5
+    //                        break
+    //
+    //                    default:
+    //                        print("handlePower : ne devrait jamais safficher")
+    //                }
+    //
+    //                i += 1
+    //            }
+    //
+    //        }
+
+
+
+    boolean wantToTurnLeft  = false;
+    boolean wantToTurnRight  = false;
+    boolean wantToJump = false;
+    long timerJump = 0l;
+    long timerBlink = 0l;
+
+
+    public void jump() {
+        if (!wantToJump) {
+            timerJump = Config.JUMP_DURATION;
+            wantToJump = true;
+
+            gv.animationForJump();
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
     /**
@@ -190,9 +309,9 @@ public class GameViewController extends Activity {
      */
     public boolean initView(ImageView view , String name, boolean animated) {
 
-        Log.d("INIT OBJECT", "initView: init view of file" + name + ". animated?: " + animated);
+        //    Log.d("INIT OBJECT", "initView: init view of file" + name + ". animated?: " + animated);
         if (!animated) {
-            Bitmap img = getBitMap(name);
+            Bitmap img = Frame.getBitMap(this, name);
             if (img != null) {
                 view.setImageDrawable(new BitmapDrawable(getResources(), img));
                 return true;
@@ -212,12 +331,6 @@ public class GameViewController extends Activity {
     }
 
 
-    protected Bitmap getBitMap(String name){
-        int imgId = getResources().getIdentifier(name, "drawable", getPackageName());
-        if(imgId == 0) return  null;
-        Bitmap image = BitmapFactory.decodeResource(getResources(), imgId);
-        return  image;
-    }
 
 
 
@@ -301,13 +414,11 @@ public class GameViewController extends Activity {
     long MALUS_DURATION  = 2l;
     boolean malus  = false; //indique si le personnage s'est cogné
 
-    long timerJump = 0l;
-    long timerBlink = 0l;
 
 
 
     public void  updateView() {
-        Log.d(TAG, "updateView:-------------------- Hello from updateView-------------------------");
+        // Log.d(TAG, "updateView:-------------------- Hello from updateView-------------------------");
         //on véerifie si le personnage a sauté
         if (wantToJump) {
             timerJump -= duration;
@@ -329,19 +440,19 @@ public class GameViewController extends Activity {
 
 
         Type t = modelRoad.getElemAtIndex(Config.INITIAL_CHAR_POSITION).type;
-        Log.d("TYPE OF ROAD", "VOUS vs etes sur une route de type " + t + " et votre index est " + Config.INITIAL_CHAR_POSITION);
-        Log.d(TAG, "updateView: le dernier element est " +(TypeOfRoad)modelRoad.getLastElem().type + " " + modelRoad.getLastElem().index );
+        //Log.d("TYPE OF ROAD", "VOUS vs etes sur une route de type " + t + " et votre index est " + Config.INITIAL_CHAR_POSITION);
+        //Log.d(TAG, "updateView: le dernier element est " +(TypeOfRoad)modelRoad.getLastElem().type + " " + modelRoad.getLastElem().index );
 
         if ((t == TypeOfRoad.TURNLEFT && !wantToTurnLeft) || (t == TypeOfRoad.TURN_RIGHT && !wantToTurnRight)) {
             Log.d("********GAME OVER******", "VOUS N'AVEZ PAS tourner");
-            timer.cancel();
+            handler.removeCallbacks(runnable);
             return;
         }
 
 
         if( t == TypeOfRoad.TREE && !wantToJump && malus ){
             Log.d("****GAME OVER******", "VOUS vs etes cogné");
-            timer.cancel();
+            handler.removeCallbacks(runnable);
             return;
         }
 
@@ -354,7 +465,7 @@ public class GameViewController extends Activity {
             wantToTurnRight = false;
 
             //on invalide le timer et on en rreceer un autre plus rapide
-            timer.cancel();
+            handler.removeCallbacks(runnable);
             duration = duration - 10;
             threeDRoadVC.setDuration(duration);
 
@@ -368,12 +479,15 @@ public class GameViewController extends Activity {
             timerBlink = Config.BLINK_DURATION;
         }
 
-            TypeOfRoad lastElemType = (TypeOfRoad)modelRoad.getLastElem().type;
-                if (!threeDRoadVC.stopGeneratingCoins() && (lastElemType == TypeOfRoad.STRAIGHT || lastElemType == TypeOfRoad.BRIDGE)){
-                    createObject();
-                }
-                modelRoad.moveDown();
-                threeDRoadVC.createRoad(null, level);
+        TypeOfRoad lastElemType = (TypeOfRoad)modelRoad.getLastElem().type;
+        if (!threeDRoadVC.stopGeneratingCoins() && (lastElemType == TypeOfRoad.STRAIGHT || lastElemType == TypeOfRoad.BRIDGE)){
+            createObject();
+        }
+        modelRoad.moveDown();
+        threeDRoadVC.createRoad(null, level);
+
+        gv.objectsView.invalidate();
+        threeDRoadVC.roadView.invalidate();
 
 
         //vérifie s'il y a des pouvoirs en cours d'execution
@@ -384,11 +498,11 @@ public class GameViewController extends Activity {
         //tentative de suppression de l'objet situé devant le personnage
         //suppression de l'objet située 1 cases devant
         Frame obj = modelRoad.removeObject(thePosition[0], thePosition[1], any);
-
-        //si aucun n'objet n'est devant le personnage rien à faire
-        if (obj == null){
-            return;
-        }
+//
+//        //si aucun n'objet n'est devant le personnage rien à faire
+//        if (obj == null){
+//            return;
+//        }
 
 
         //les coordonnées du point vers lesquels renvoyer les pieces
@@ -447,95 +561,6 @@ public class GameViewController extends Activity {
         wantToTurnLeft = false;
         wantToTurnRight = false;
     }
-
-
-
-
-    //        func handlePower(){
-    //
-    //            //si un aucun poucoir n'est en cours d'execution on ne fait rien
-    //            if(TTL.isEmpty) {return}
-    //
-    //            var i = 0
-    //            while i<TTL.count  {
-    //                let (power, ttl) = TTL.first!
-    //                //si le pouvoir a fini de s'executer
-    //                if ttl <= 0 {
-    //                    print("le pouvoir \(power) est terminé")
-    //                    //un pouvoir est enclenché
-    //                    TTL.remove(at: 0)
-    //
-    //                    continue
-    //                }
-    //
-    //                let timeToLive = ttl - duration!
-    //                        TTL[0].1 = timeToLive
-    //                aa += 1
-    //
-    //                switch power {
-    //
-    //                    case magnet:
-    //                        //attirer les pieces situé dans le voisinage
-    //                        //on commence par retirer les pieces concernées du chemin
-    //
-    //
-    //                        for i in 0..<modelRoad.nColumns {
-    //                        for neighborhood in 1 ... DISTANCE_OF_MAGNET {
-    //                            //on tente de retirer les pieces situées dans le voisinage du personnage
-    //                            let coin = modelRoad.removeObject(i: i, j: thePosition.1 - neighborhood, type: coin).view
-    //
-    //                            //si on trouve une piece
-    //                            if coin != nil {
-    //                                //on deplace la piece vers le personnage
-    //                                moveObjToPoint(coin!,
-    //                                        point: gv.character.center,
-    //                                        withDuration: 1,
-    //                                        options: .curveEaseIn,
-    //                                        cb : {_ in
-    //                                    coin!.isHidden = true
-    //                                    self.coins.insert(coin!)
-    //                                }
-    //                            )
-    //
-    //                                //TODO faire un mouvement plus naturel
-    //                                //Peut etre animation suivant une courbe de bezier
-    //                            }
-    //                        }
-    //                    }
-    //                    break
-    //
-    //                    case transparency:
-    //                        //le personnage devient mi-transparent
-    //                        //il devient capable de traverser les obstacles
-    //                        gv.character.alpha = 0.5
-    //                        break
-    //
-    //                    default:
-    //                        print("handlePower : ne devrait jamais safficher")
-    //                }
-    //
-    //                i += 1
-    //            }
-    //
-    //        }
-
-
-
-    boolean wantToTurnLeft  = false;
-    boolean wantToTurnRight  = false;
-    boolean wantToJump = false;
-
-
-    public void jump() {
-        if (!wantToJump) {
-            timerJump = Config.JUMP_DURATION;
-            wantToJump = true;
-
-            gv.animationForJump();
-        }
-    }
-
-
 
 
 

@@ -64,7 +64,7 @@ public class ThreeDRoadViewController  {
         this.roadView = roadView;
         this.ctx = ctx;
 
-        Log.d(TAG, "init roadView : " + roadView);
+     //   Log.d(TAG, "init roadView : " + roadView);
     }
 
     public ThreeDRoadViewController( Map<TypeOfRoad, String> names, long duration, ThreeDRoadModel model3D, int N){
@@ -100,12 +100,12 @@ public class ThreeDRoadViewController  {
     public void getImages(Type ofType){
         String name = getName(ofType);
 
-        Log.d(TAG, "---------getImages: of type " + ofType);
+       // Log.d(TAG, "---------getImages: of type " + ofType);
 
         if(ofType == TypeOfRoad.TURN_RIGHT || ofType == TypeOfRoad.TURNLEFT){
-            Log.d(TAG, "getImages: turn left");
+          //  Log.d(TAG, "getImages: turn left");
         }
-        Bitmap image = getBitMap(name);
+        Bitmap image = Frame.getBitMap(ctx, name);
         if( image != null ){
             ImageView img = new ImageView(ctx);
             img.setImageDrawable(new BitmapDrawable(ctx.getResources(), image));
@@ -114,23 +114,18 @@ public class ThreeDRoadViewController  {
         else {
             int i = 1;
 
-            image = getBitMap(name + "_" + String.valueOf(i));
+            image = Frame.getBitMap(ctx, name + "_" + String.valueOf(i));
             while(image != null){
                 ImageView img = new ImageView(ctx);
                 img.setImageDrawable(new BitmapDrawable(ctx.getResources(), image));
                 buffer.add(new Pair<>(img, ofType));
                 i++;
-                image = getBitMap(name + "_" + String.valueOf(i));
+                image = Frame.getBitMap(ctx,name + "_" + String.valueOf(i));
             }
         }
     }
 
-    protected Bitmap getBitMap(String name){
-        int imgId = ctx.getResources().getIdentifier(name, "drawable", ctx.getPackageName());
-        if(imgId == 0) return  null;
-        Bitmap image = BitmapFactory.decodeResource(ctx.getResources(), imgId);
-        return  image;
-    }
+
 
     /*
      genere 4 vue de type straight
@@ -142,7 +137,7 @@ public class ThreeDRoadViewController  {
         model3D.deleteAllRoad();
         for (int i =0 ; i< N; i++) {
             createRoad(TypeOfRoad.STRAIGHT, level);
-            Log.d(TAG, "startTheGame: "+nbElements);
+           // Log.d(TAG, "startTheGame: "+nbElements);
         }
     }
 
@@ -163,10 +158,10 @@ public class ThreeDRoadViewController  {
             //on genere un nouvel element si on ne va pas tourner
             if( withType == null ){
                 t = model3D.generateElement(level);
-                Log.d(TAG, "createRoad: create road of type "+t.toString());
+               // Log.d(TAG, "createRoad: create road of type "+t.toString());
 
                 if (t == TypeOfRoad.TURNLEFT || t == TypeOfRoad.TURN_RIGHT ){
-                    Log.d(TAG,"createRoad: *************l'utilisateur va tourner************");
+                //    Log.d(TAG,"createRoad: *************l'utilisateur va tourner************");
                     goingToTurn = true;
                     stopCoins = true;
                 }
@@ -186,14 +181,13 @@ public class ThreeDRoadViewController  {
 
         if (frame != null) {
             ImageView img = pair.first;
-            img.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
             Frame.setLayout(frame);
             roadView.addView(img);
             Frame.startAnimation(frame);
             buffer.remove(0);
 
-            Log.d(TAG, "createRoad: append the road of type " + pair.second.toString());
+         //   Log.d(TAG, "createRoad: append the road of type " + pair.second.toString());
         }
     }
 

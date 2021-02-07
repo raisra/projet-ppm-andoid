@@ -16,8 +16,7 @@ import java.util.Arrays;
 
 public class ModelRoad {
     protected float iN[];
-    protected int iMin;
-    protected int iMax;
+
     protected int nRows;
     protected int nColumns;
 
@@ -56,22 +55,21 @@ public class ModelRoad {
         this.bSize = p.bSize;
         this.fSize = p.fSize;
 
-        float i0 = (p.W - p.D) / 2;
+        float i0 = (p.W - p.D) / 2f;
         this.iN = new float[p.nColumns];
 
         for (int i = 0; i < nColumns; i++) {
             iN[i] = i0 + d * i;
         }
 
-        this.iMin = 1;
-        this.iMax = nColumns - 2;
+
 
         this.size0 = p.size0;
         this.factor = p.factor;
 
         this.heightOfScreen = p.heightOfScreen;
 
-        H = (float) (size0.getHeight() * (1 - Math.pow(factor, p.nRows)) / (1 - factor));
+        H = (float) (size0.getHeight() * (1f - Math.pow(factor, p.nRows)) / (1f - factor));
 
         roadGrid = new Frame[(nRows + 1) * nColumns];
 
@@ -87,8 +85,8 @@ public class ModelRoad {
             for (int i = 0; i < nColumns; i++) {
                 // print("k:\(k) i:\(i) center:\(x)" )
                 Size s = new Size((int) G(k), (int) G(k));
-                float x = linearX(i, k) - s.getWidth()/2;;
-                float y = heightOfScreen - F(k) - s.getHeight()/2;
+                float x = linearX(i, k) - s.getWidth()/2f;;
+                float y = heightOfScreen - F(k) - s.getHeight()/2f;
 
                 Point o = new Point((int) x, (int) y);
                 Frame f = new Frame();
@@ -130,7 +128,7 @@ public class ModelRoad {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public float linearX(int i, int k) {
-        return (float) (linearNoCenter(i, k) + W / (2 * nColumns) + F(k) * (d - W / nColumns) / (2.0 * H));
+        return (float) (linearNoCenter(i, k) + W / (2f * nColumns) + F(k) * (d - W / nColumns) / (2f * H));
     }
 
 
@@ -138,7 +136,7 @@ public class ModelRoad {
     public float F(float k) {
         float f = factor;
         float h0 = size0.getHeight();
-        float a = (float) (H - h0 * Math.pow(f, nRows - 1) * (Math.pow(1 / f, k) - 1) / (1 / f - 1));
+        float a = (float) (H - h0 * Math.pow(f, nRows - 1f) * (Math.pow(1f / f, k) - 1f) / (1f / f - 1f));
         return a;
     }
 
@@ -159,13 +157,13 @@ public class ModelRoad {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void moveDown() {
         //suppression de la derniere ligne
-        for (int i = iMin; i <= iMax; i++) {
+        for (int i = 0; i < nColumns; i++) {
             Frame obj = getObj(i, nRows);
             if (obj.getType() != null) obj.view.setVisibility(View.INVISIBLE);
         }
 
         //decalage des case vers le bas
-        for (int i = iMin; i <= iMax; i++) {
+        for (int i = 0; i < nColumns; i++) {
             int j = nRows - 1;
             while (j >= 0) {
                 Frame obj = getObj(i, j + 1);
@@ -176,14 +174,13 @@ public class ModelRoad {
 
                 View view = obj.view;
                 Frame.setLayout(obj);
-                obj.view.postInvalidate();
 
                 j -= 1;
             }
         }
 
         //Creation d'une ligne vide et insertion au debut de la grille
-        for (int i = iMin; i <= iMax; i++) {
+        for (int i = 0; i < nColumns; i++) {
             Frame obj = roadGrid[i];
             obj.view = null;
             obj.type = null;
@@ -284,10 +281,10 @@ public class ModelRoad {
             return coins;
         } else {
             p = random(1, 100);
-            TypeOfObject[] objPos = new TypeOfObject[iMax];
+            TypeOfObject[] objPos = new TypeOfObject[nColumns];
             Arrays.fill(objPos, null);
 
-            int r1 = random(0, iMax - 1);
+            int r1 = random(0, nColumns - 1);
             TypeOfObject t;
             if (p > 90) {
                 //ici evenement rare

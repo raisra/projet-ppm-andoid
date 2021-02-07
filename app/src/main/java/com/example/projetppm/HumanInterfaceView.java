@@ -65,7 +65,7 @@ public class HumanInterfaceView extends ConstraintLayout implements  Game {
         messageButton.setVisibility(INVISIBLE);
         counterView.setVisibility(VISIBLE);
 
-        Log.d(TAG, "init: HumanInterfaceView");
+      //  Log.d(TAG, "init: HumanInterfaceView");
     }
 
     public void startTheGame(){

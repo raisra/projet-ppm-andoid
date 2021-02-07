@@ -30,24 +30,30 @@ public class ThreeDRoadModel extends ModelRoad {
     public long duration ;
     public final long duration0;
 
+    public int iMin;
+    public int iMax;
+
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public ThreeDRoadModel(Param p, long duration) {
         super(p);
+
+        this.iMin = 1;
+        this.iMax = nColumns - 2;
+
         this.duration = duration;
         this.duration0 = duration;
         float scale = (p.fSize - p.bSize)/p.nRows;
 
 
         for(int k=0  ; k<= super.nRows ; k++) {
-            for(int i =super.iMin ; i<= super.iMax ; i++){
-                //
+            for(int i =iMin ; i<= iMax ; i++){
                 Frame f = getObj(i, k);
-
                 long s = computeSpeed();
-                float o = computeOpacity(super.nRows-k);
-                float sc = 1 + scale/( p.bSize + scale * k );
+                float o = computeOpacity(k);
+                float sc = 1f + scale/( p.bSize + scale * k );
+                float y = computeYTranslation(k,1);
                 float x = computeXTranslation(i,k);
-                float y = computeYTranslation(i,k,1);
 
                 f.duration = s;
                 f.opacity = o;
@@ -63,19 +69,20 @@ public class ThreeDRoadModel extends ModelRoad {
         for(int k=0 ; k<= super.nRows ; k++) {
             Frame f = this.getObj(0, k);
 
-            Point fr = computeTopLeft(nRows-k);
+            Point fr = computeTopLeft(k);
             long s = computeSpeed();
-            float o = computeOpacity(nRows-k);
-            float sc = 1/factor;
-            float y = computeYTranslation(nRows - k);
-            Size size = computeSize( nRows - k);
+            float o = computeOpacity(k);
+            float sc = factor;
+            float y = computeYTranslation(k,sc);
+            float x = 0;
+            Size size = computeSize( k);
             f.topLeft = fr;
             f.duration = s;
             f.opacity = o;
-            f.scaleH = sc;
-            f.scaleW = sc;
+            f.scaleH = 1f/sc;
+            f.scaleW = 1f/sc;
             f.yTranslate = y;
-            f.xTranslate = 0;
+            f.xTranslate = x;
             f.size = size;
             f.setType(null);
             f.index = nRows - k;
@@ -83,14 +90,11 @@ public class ThreeDRoadModel extends ModelRoad {
             initAnimation(f);
 
 
-            Log.d("INIT ROAD" ,"initRoad: elem: " + f.index + " pos:" + f.topLeft + " size: " + f.size );
+        //    Log.d("INIT ROAD" ,"initRoad: elem: " + f.index + " pos:" + f.topLeft + " size: " + f.size );
         }
-        Log.d("HEIGHT of screen", "ThreeDRoadModel: heightofscreen " + p.heightOfScreen + " " + heightOfScreen);
+      //  Log.d("HEIGHT of screen", "ThreeDRoadModel: heightofscreen " + p.heightOfScreen + " " + heightOfScreen);
 
     }
-
-
-
 
 
     public void reset() {
@@ -100,8 +104,6 @@ public class ThreeDRoadModel extends ModelRoad {
     }
 
 
-
-
     public void setDuration(long duration)  {
         this.duration = duration;
     }
@@ -109,7 +111,7 @@ public class ThreeDRoadModel extends ModelRoad {
     public Frame getElemAtIndex(int i) {
         if( nbElements == 0){
         return null;
-    }
+        }
 
         return getObj(0, nRows - i );
     }
@@ -117,10 +119,8 @@ public class ThreeDRoadModel extends ModelRoad {
 
 
      @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-     public Point computeTopLeft(int index){
-         int i = nRows - index;
+     public Point computeTopLeft(int i){
          float f = linearNoCenter(0, i);
-         float h = F(i-1)-F(i);
 
          return new Point((int)f, (int)(heightOfScreen - F(i-1)));
     }
@@ -128,32 +128,20 @@ public class ThreeDRoadModel extends ModelRoad {
 
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public Size computeSize(int index) {
-        int i = nRows - index;
+    public Size computeSize(int i) {
         float h = F(i-1)-F(i);
-        return new Size((int)(size0.getWidth() * Math.pow(factor,index)),(int) h );
+        return new Size((int)(size0.getWidth() * Math.pow(factor,nRows - i)),(int) h );
     }
-
-
 
     public long computeSpeed() {
         return  duration;
     }
 
-    public float computeOpacity(int index) {
-
+    public float computeOpacity(int i) {
         return 1;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public float computeYTranslation(int index) {
-        float i = nRows - index;
 
-        float c = (factor+1) * F(i) / 2;
-        float d = (factor+1) * F(i+1) / 2;
-
-        return c-d;
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public float computeXTranslation(int i, int j){
@@ -161,17 +149,13 @@ public class ThreeDRoadModel extends ModelRoad {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public float computeYTranslation(int i, int j, float factor){
-        float c = (factor+1) * F(j) / 2;
-        float d = (factor+1) * F(j+1) / 2;
+    public float computeYTranslation(int j, float factor){
+        float c = (factor+1f) * F(j) / 2f;
+        float d = (factor+1f) * F(j+1) / 2f;
 
         return c-d;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public float computeYTranslation(int i, int j){
-        return computeYTranslation(i,j, this.factor);
-    }
 
 
 
@@ -298,8 +282,6 @@ public class ThreeDRoadModel extends ModelRoad {
 
                 if(obj.view!= null) {
                     Frame.setLayout(obj);
-                    obj.view.invalidate();
-                    obj.view.clearAnimation();
                     Frame.startAnimation(obj);
                 }
 
@@ -322,6 +304,8 @@ public class ThreeDRoadModel extends ModelRoad {
         if (nbElements < 0){
             nbElements = 0;
         }
+
+
     }
 
 
@@ -390,7 +374,7 @@ public class ThreeDRoadModel extends ModelRoad {
     public void initAnimation(Frame elem){
 
         if( elem.index_j == -1 ){
-            Log.d("INIANIM" ,"initAnimation: elem: " + elem.index + " trans x:" + elem.xTranslate + " trans y: " + elem.yTranslate + " scale: " + elem.scaleW + "," + elem.scaleH );
+          //  Log.d("INIANIM" ,"initAnimation: elem: " + elem.index + " trans x:" + elem.xTranslate + " trans y: " + elem.yTranslate + " scale: " + elem.scaleW + "," + elem.scaleH );
         }
 
 
