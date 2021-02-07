@@ -67,13 +67,14 @@ public class GameView extends RelativeLayout implements Game{
         this.speed = s;
         character = (ImageView) findViewById(R.id.character_view_id);
         objectsView = (RelativeLayout) findViewById(R.id.objects_view);
-        
-
         initPersonnage(centerOfChar, sizeOfChar);
 
         Log.d(TAG, "init: gameView");
     }
 
+    public void setCharPosition(Point position){
+        ModelRoad.setlayout(character,Config.sizeChar,position);
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     /**
@@ -179,14 +180,11 @@ public class GameView extends RelativeLayout implements Game{
         res += ", h: " + character.getLayoutParams().height;
 
         res += ")";
-       return  res;
+        return  res;
     }
 
 
 }
-
-
-
 
 
 

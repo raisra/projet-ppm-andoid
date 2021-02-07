@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
 import android.view.Display;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -35,7 +37,7 @@ import static com.example.projetppm.TypeOfObject.*;
 
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class GameViewController extends Activity {
+public class GameViewController extends Activity implements GestureDetector.OnGestureListener {
 
     public  String TAG = "GAMEVIEWCONTROLLER";
 
@@ -63,6 +65,9 @@ public class GameViewController extends Activity {
     //        public GestureManager gestureManager;
     //        public MotionManager motionManager ;
 
+    private GestureDetector gestureDector;
+    private float x1, x2, y1, y2;
+    private static int MIN_DISTANCE = 150;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,6 +75,8 @@ public class GameViewController extends Activity {
 
         Log.d(TAG, "view on create");
         setContentView(R.layout.game_view);
+        //Swipe
+        this.gestureDector = new GestureDetector(GameViewController.this, this);
 
         gv = (GameView) findViewById(R.id.game_view_id);
         hv = (HumanInterfaceView) findViewById(R.id.human_interface_view_id);
@@ -153,6 +160,7 @@ public class GameViewController extends Activity {
             timer.cancel();
             gv.stopTheGame();
             hv.stopTheGame();
+            WelcomViewController.gameSound.stop();
         }
         else {
             //restart the game
@@ -270,7 +278,7 @@ public class GameViewController extends Activity {
             Frame f = modelRoad.addObj(newObject, type, colonne + modelRoad.iMin , 0);
             ModelRoad.setlayout(newObject, f.size, f.topLeft);
             gv.objectsView.addView(newObject);
-           // modelRoad.initAnimation(f);
+            // modelRoad.initAnimation(f);
             startAnimation(f);
             Log.d(TAG, "&&&&&&&&&&&&&&&&&&&&&&&run: Hello from run " + this);
 
@@ -560,9 +568,106 @@ public class GameViewController extends Activity {
         elem.view.startAnimation(elem.transformation);
     }
 
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        return false;
+    }
+
+
+    //Movements
+    public void moveRight(){
+        thePosition[0] = Math.min(modelRoad.iMax , thePosition[0] + 1);
+        Point s = modelRoad.getCenter(thePosition[0],thePosition[1]);
+        gv.setCharPosition(s);
+        wantToTurnRight = true;
+    }
+
+    public void moveLeft (){
+        thePosition[0] = Math.max(modelRoad.iMin, thePosition[0]- 1);
+        Point s = modelRoad.getCenter(thePosition[0],thePosition[1]);
+        gv.setCharPosition(s);
+        wantToTurnLeft = true;
+    }
+
+
+    public void moveDown() {
+        //images don't work
+    }
+    //ON touch event :
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        gestureDector.onTouchEvent(event);
+        switch (event.getAction()){
+            //Swipe time gesture
+            case MotionEvent.ACTION_DOWN :
+                x1 = event.getX();
+                y1 = event.getY();
+                break;
+            //ending swipe
+            case MotionEvent.ACTION_UP:
+                x2 = event.getX();
+                y2 = event.getY();
+
+                //getting value for horizantal swipe
+                float valueX = x2 - x1;
+                //getting value for vertical swipe
+                float valueY = y2 - y1;
+
+                if (Math.abs(valueX)> MIN_DISTANCE) {
+                    //right :
+                    if(x2>x1){
+                        //COMPLETE WITH RIGHT MOVE
+                        Log.d(TAG, "Goes Right");
+                    }
+                    //left :
+                    else{
+                        //COMPLETE WITH LEFT MOVE
+                        Log.d(TAG, "Goes Left");
+                    }
+                }
+                else if (Math.abs(valueY)> MIN_DISTANCE){
+                    //down
+                    if(y2>y1){
+                        //COMPLETE WITH DOWN MOVE
+                        Log.d(TAG, "Goes Down");
+
+
+                    }
+                    //UP
+                    else{
+                        //COMPLETE WITH UP MOVE
+                        Log.d(TAG, "Goes Up");
+                    }
+                }
+        }
+
+        return super.onTouchEvent(event);
+    }
 
 }
-
-
-
-
